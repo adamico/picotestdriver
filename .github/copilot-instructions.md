@@ -3,6 +3,8 @@
 ## Project Overview
 Pico Test Driver is a comprehensive automated testing framework for PICO-8 cartridges, enabling developers to create, run, and debug tests with detailed output and command-line integration. The framework works within PICO-8's strict constraints: 8192 token limit, limited Lua standard library, no exception handling, and global scope by default.
 
+These instructions help AI assistants understand the framework's patterns and constraints. While AI can accelerate development, remember that PICO-8's unique environment requires human expertise to ensure compatibility with its limitations and design philosophy.
+
 ## Key Files
 - **`test_framework.lua`** - Core framework managing test phases, frame counting, logging, and initialization
 - **`test_utils.lua`** - Testing utilities including assertions, performance measurement, input simulation, and result collection

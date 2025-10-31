@@ -333,6 +333,19 @@ cd pico8-test-framework
 ./run_test.sh movement_test --verbose
 ```
 
+### AI-Assisted Development
+
+This project includes [Copilot Instructions](.github/copilot-instructions.md) to help AI coding assistants understand the framework's unique PICO-8 constraints and patterns. AI tools can be helpful for:
+
+- **Code generation** within PICO-8's Lua limitations
+- **Pattern recognition** for test structure and assertions
+- **Documentation** drafting and examples
+- **Debugging assistance** with frame-based execution
+
+However, AI suggestions should always be validated against PICO-8's specific constraints (token limits, available APIs, global scope requirements). The framework's patterns are designed to work within these limitations, so human judgment remains essential for ensuring compatibility.
+
+**Model Recommendations**: For PICO-8 development, Claude 4 generally provides more accurate suggestions than Grok due to better understanding of technical constraints and code patterns.
+
 ### Commit Conventions
 
 This project uses conventional commits. Please follow these commit types:

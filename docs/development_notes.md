@@ -226,6 +226,25 @@ git commit -m "docs: update integration guide"
 - **Git Hooks**: Custom hooks in `.git-hooks/` enforce commit conventions
 - **Copilot Instructions**: `.github/copilot-instructions.md` guides AI assistants
 
+### AI Assistance in Development
+
+The framework includes comprehensive AI assistant guidance to help with PICO-8 development. AI tools can accelerate development by:
+
+- **Understanding PICO-8 constraints** through the provided context
+- **Generating test patterns** that follow the established conventions
+- **Suggesting assertion strategies** for common testing scenarios
+- **Helping with documentation** and code examples
+
+That said, AI suggestions need careful review because:
+- PICO-8's Lua dialect lacks many standard library functions
+- Token limits require concise code patterns
+- Global scope affects how functions and variables are organized
+- Frame-based execution timing is unique to game development
+
+The Copilot Instructions document helps AI assistants understand these constraints, but developers should verify that generated code actually runs within PICO-8's environment.
+
+**AI Model Suitability**: For technical accuracy with PICO-8 development, Claude 4 typically provides more reliable suggestions than Grok, particularly for understanding platform-specific constraints and code patterns.
+
 ### Testing
 - Test framework changes with framework itself
 - Include example usage
