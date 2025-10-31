@@ -1,11 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
+-- Pico Test Driver
+-- by kc00l - PICO-8 Automated Testing Framework - Test Your Games Like a Pro!
 #include test_framework.lua
 #include test_utils.lua
 
--- Example PICO-8 game with automated testing
--- Demonstrates the testing framework capabilities
 
 -- Game state
 local player = {
