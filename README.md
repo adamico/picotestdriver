@@ -134,10 +134,47 @@ local result = test_measure_performance(my_function, 100, "My Function")
 # Custom timeout
 ./run_test.sh combat_test 120
 
+# List available test phases
+./run_test.sh --list
+./run_test.sh -l -c my_test.p8
+
 # Help and options
 ./run_test.sh --help
-./run_test.sh --list
 ./run_test.sh --verbose
+```
+
+#### Command Line Options
+
+- **`-h, --help`**: Display help information and usage examples
+- **`-v, --version`**: Show the framework version
+- **`-c, --cart FILE`**: Specify the test cartridge file (default: `test_cart.p8`)
+- **`-l, --list`**: List all available test phases defined in the cartridge and included files
+- **`--verbose`**: Enable detailed output during test execution
+
+#### The --list Option
+
+The `--list` (or `-l`) option inspects your test cartridge and displays all available test phases. It searches for `test_init()` calls in:
+
+1. The cartridge file itself (`.p8`)
+2. All included `.lua` files (excluding `test_framework.lua` and `test_utils.lua`)
+
+This helps you discover what test phases are available in your cartridge without having to examine the code manually.
+
+**Examples:**
+
+```bash
+# List phases in default cartridge
+./run_test.sh --list
+
+# List phases in specific cartridge
+./run_test.sh -l -c my_game_tests.p8
+
+# Output example:
+Available test phases in 'test_cart.p8':
+  movement - Test phase
+  collision - Test phase
+  input - Test phase
+  boundary - Test phase
 ```
 
 ### Example Test

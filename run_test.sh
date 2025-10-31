@@ -104,6 +104,88 @@ check_cartridge() {
     fi
 }
 
+# Function to handle --list option
+handle_list_phases() {
+    local cart_file=$1
+    print_color $BLUE "Available test phases in '$cart_file':"
+    echo ""
+
+    # Get the directory of the cartridge file
+    local cart_dir
+    cart_dir=$(dirname "$cart_file")
+
+    # Collect all phases from cartridge and included files
+    local all_phases=""
+    local found_phases=false
+
+    # First check the cartridge file itself
+    local phases_line
+    phases_line=$(grep -A 20 "test_init" "$cart_file" | grep "phases\s*=\s*{" | head -1)
+
+    if [ -n "$phases_line" ]; then
+        local phases_array
+        phases_array=$(echo "$phases_line" | sed 's/.*phases\s*=\s*{//' | sed 's/}.*//')
+        all_phases="$phases_array"
+        found_phases=true
+    fi
+
+    # Then check included .lua files (excluding test_framework.lua and test_utils.lua)
+    local included_files
+    included_files=$(grep "^#include" "$cart_file" | sed 's/#include //' | grep '\.lua$' | grep -v 'test_framework\.lua' | grep -v 'test_utils\.lua')
+
+    for lua_file in $included_files; do
+        # Resolve the path relative to the cartridge file directory
+        local resolved_path
+        if [[ "$lua_file" == /* ]]; then
+            # Absolute path
+            resolved_path="$lua_file"
+        else
+            # Relative path
+            resolved_path="$cart_dir/$lua_file"
+        fi
+
+        if [ -f "$resolved_path" ]; then
+            phases_line=$(grep -A 20 "test_init" "$resolved_path" | grep "phases\s*=\s*{" | head -1)
+            if [ -n "$phases_line" ]; then
+                local phases_array
+                phases_array=$(echo "$phases_line" | sed 's/.*phases\s*=\s*{//' | sed 's/}.*//')
+                if [ -n "$all_phases" ]; then
+                    all_phases="$all_phases,$phases_array"
+                else
+                    all_phases="$phases_array"
+                fi
+                found_phases=true
+            fi
+        fi
+    done
+
+    if [ "$found_phases" = true ]; then
+        # Remove duplicates and split by comma and process each phase
+        local unique_phases
+        unique_phases=$(echo "$all_phases" | tr ',' '\n' | sort | uniq | tr '\n' ',' | sed 's/,$//')
+
+        IFS=',' read -ra PHASE_ARRAY <<< "$unique_phases"
+
+        for phase in "${PHASE_ARRAY[@]}"; do
+            # Trim whitespace and quotes
+            phase=$(echo "$phase" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/"//g' | sed "s/'//g")
+
+            if [ -n "$phase" ]; then
+                echo "  $phase - Test phase"
+            fi
+        done
+    else
+        print_color $YELLOW "No test_init function with phases found in cartridge or included files."
+        echo "  all - Run all tests"
+        echo ""
+        print_color $YELLOW "Make sure your cartridge or included .lua files include a test_init call with a phases array."
+    fi
+
+    echo ""
+    print_color $BLUE "Usage: $0 [-c CART_FILE] PHASE"
+    print_color $BLUE "Example: $0 -c test_cart.p8 movement"
+}
+
 # Parse command line arguments
 PHASE="all"
 TIMEOUT=$DEFAULT_TIMEOUT
@@ -155,6 +237,12 @@ fi
 # Check prerequisites
 check_pico8
 check_cartridge "$CART_FILE"
+
+# Handle list phases option
+if $LIST_PHASES; then
+    handle_list_phases "$CART_FILE"
+    exit 0
+fi
 
 # Show configuration
 print_color $BLUE "=== PICO-8 Test Framework Runner v${SCRIPT_VERSION} ==="

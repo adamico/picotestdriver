@@ -94,7 +94,35 @@ end
 
 # Run with longer timeout
 ./run_test.sh collision 60
+
+# List available test phases
+./run_test.sh --list
+./run_test.sh -l -c my_test.p8
 ```
+
+#### Discovering Test Phases
+
+Use the `--list` option to see all available test phases in your cartridge:
+
+```bash
+./run_test.sh --list
+```
+
+This will scan your cartridge and included `.lua` files to find all defined test phases. Example output:
+
+```
+Available test phases in 'test_cart.p8':
+  movement - Test phase
+  collision - Test phase
+  input - Test phase
+  boundary - Test phase
+```
+
+This is especially useful when:
+- Working with complex test suites
+- Collaborating with other developers
+- Debugging which phases are available
+- Integrating with CI/CD pipelines
 
 ## Complete Example
 

@@ -249,7 +249,7 @@ main() {
 
     # Handle list phases option
     if [ "$LIST_PHASES" = "true" ]; then
-        handle_list_phases
+        handle_list_phases "$CART_FILE"
         return 0
     fi
 

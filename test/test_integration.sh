@@ -33,11 +33,12 @@ echo
 echo "Testing list phases output..."
 
 # Test list phases output
-list_output=$(handle_list_phases)
-assert_contains "$list_output" "Available Test Phases" "list should contain header"
-assert_contains "$list_output" "movement_test" "list should contain movement test"
-assert_contains "$list_output" "collision_test" "list should contain collision test"
-assert_contains "$list_output" "boundary_test" "list should contain boundary test"
+list_output=$(handle_list_phases "test_cart.p8")
+assert_contains "$list_output" "Available test phases in test_cart.p8" "list should show cartridge-specific phases"
+assert_contains "$list_output" "movement" "list should contain movement test"
+assert_contains "$list_output" "collision" "list should contain collision test"
+assert_contains "$list_output" "input" "list should contain input test"
+assert_contains "$list_output" "boundary" "list should contain boundary test"
 assert_contains "$list_output" "all" "list should contain all phases"
 
 echo
