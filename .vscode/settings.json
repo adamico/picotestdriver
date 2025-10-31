@@ -1,0 +1,40 @@
+{
+    "Lua.workspace.library": [
+        "${addons}/pico8/module/library",
+        "${addons}/busted/module/library",
+        "${3rd}/luassert/library"
+    ],
+    "Lua.runtime.version": "Lua 5.2",
+    "Lua.workspace.checkThirdParty": false,
+    "Lua.diagnostics.disable": [
+        "err-esc",
+        "lowercase-global"
+    ],
+    "Lua.runtime.nonstandardSymbol": [
+        "+=",
+        "-=",
+        "*=",
+    ],
+    "Lua.runtime.builtin": {
+        "basic": "disable",
+        "bit": "disable",
+        "bit32": "disable",
+        "builtin": "disable",
+        "coroutine": "enable",
+        "debug": "disable",
+        "ffi": "disable",
+        "io": "disable",
+        "jit": "disable",
+        "math": "disable",
+        "os": "disable",
+        "package": "disable",
+        "string": "disable",
+        "table": "disable",
+        "table.clear": "disable",
+        "table.new": "disable",
+        "utf8": "disable"
+    },
+    "pico8.outputPath": "",
+    "editor.fontFamily": "'Monaspace Neon', monospace",
+    "editor.inlineSuggest.fontFamily": "'Monaspace Krypton', monospace",
+}
