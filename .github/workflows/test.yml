@@ -1,0 +1,36 @@
+name: Test Framework Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up PICO-8
+      run: |
+        # Note: PICO-8 would need to be installed in the CI environment
+        # This is a placeholder for when PICO-8 CI support is available
+        echo "PICO-8 validation would run here"
+
+    - name: Check file structure
+      run: |
+        # Basic validation that all required files exist
+        ls -la *.lua *.sh *.md
+
+    - name: Validate Lua syntax
+      run: |
+        # Basic Lua syntax check (would need lua installed)
+        echo "Lua syntax validation would run here"
+
+    - name: Check documentation
+      run: |
+        # Ensure README and docs exist
+        test -f README.md && echo "README exists"
+        test -d docs && echo "Docs directory exists"
