@@ -11,6 +11,101 @@ local player = {
 local enemies = {}
 local bullets = {}
 
+function _init()
+  init_game()
+
+  -- Initialize test framework
+  test_init({
+    phases = { "movement", "collision", "input", "boundary" },
+    default_phase = "all",
+    timeout_frames = 1800,   -- 30 seconds
+    debug_level = "info"
+  })
+
+  -- Run appropriate test based on phase
+  local phase = test_get_phase()
+
+  if phase == "movement" then
+    test_movement()
+  elseif phase == "collision" then
+    test_collision()
+  elseif phase == "input" then
+    test_input()
+  elseif phase == "boundary" then
+    test_boundary()
+  elseif phase == "all" then
+    -- Run all tests in sequence
+    test_log("Running all tests sequentially", "info")
+  end
+end
+
+function _update60()
+  test_update_frame()
+
+  local phase = test_get_phase()
+
+  if phase == "all" then
+    -- Run tests in sequence based on frame count
+    if test_get_frame_count() == 1 then
+      test_movement()
+    elseif test_get_frame_count() == 120 then   -- After movement test
+      test_collision()
+    elseif test_get_frame_count() == 240 then   -- After collision test
+      test_input()
+    elseif test_get_frame_count() == 360 then   -- After input test
+      test_boundary()
+    end
+  else
+    -- For specific phase tests, just run normal game if test completed
+    if not test_is_completed() then
+      return    -- Wait for test to complete
+    end
+
+    -- Normal game update
+    update_player()
+    update_enemies()
+    update_bullets()
+
+    -- Check for collisions
+    if check_collisions() then
+      -- Game over - reset
+      init_game()
+    end
+  end
+end
+
+function _draw()
+  cls(1)
+
+  -- Draw player
+  circfill(player.x, player.y, 4, player.color)
+
+  -- Draw enemies
+  for enemy in all(enemies) do
+    circfill(enemy.x, enemy.y, 3, enemy.color)
+  end
+
+  -- Draw bullets
+  for bullet in all(bullets) do
+    circfill(bullet.x, bullet.y, 1, 10)
+  end
+
+  -- Draw UI
+  print("PICO-8 TEST FRAMEWORK", 2, 2, 7)
+  print("Phase: " .. test_get_phase(), 2, 10, 7)
+  print("Frame: " .. test_get_frame_count(), 2, 18, 7)
+
+  if test_is_completed() then
+    print("TEST COMPLETED", 2, 26, 11)
+  else
+    print("TEST RUNNING...", 2, 26, 8)
+  end
+
+  -- Instructions
+  print("Use arrow keys to move", 2, 120, 6)
+  print("Avoid red enemies", 2, 126, 6)
+end
+
 -- Game functions
 function init_game()
   player.x = 64
@@ -181,99 +276,4 @@ function test_boundary()
 
   test_log("Boundary test completed successfully", "info")
   test_complete()
-end
-
-function _init()
-  init_game()
-
-  -- Initialize test framework
-  test_init({
-    phases = { "movement", "collision", "input", "boundary" },
-    default_phase = "all",
-    timeout_frames = 1800,   -- 30 seconds
-    debug_level = "info"
-  })
-
-  -- Run appropriate test based on phase
-  local phase = test_get_phase()
-
-  if phase == "movement" then
-    test_movement()
-  elseif phase == "collision" then
-    test_collision()
-  elseif phase == "input" then
-    test_input()
-  elseif phase == "boundary" then
-    test_boundary()
-  elseif phase == "all" then
-    -- Run all tests in sequence
-    test_log("Running all tests sequentially", "info")
-  end
-end
-
-function _update60()
-  test_update_frame()
-
-  local phase = test_get_phase()
-
-  if phase == "all" then
-    -- Run tests in sequence based on frame count
-    if test_get_frame_count() == 1 then
-      test_movement()
-    elseif test_get_frame_count() == 120 then   -- After movement test
-      test_collision()
-    elseif test_get_frame_count() == 240 then   -- After collision test
-      test_input()
-    elseif test_get_frame_count() == 360 then   -- After input test
-      test_boundary()
-    end
-  else
-    -- For specific phase tests, just run normal game if test completed
-    if not test_is_completed() then
-      return    -- Wait for test to complete
-    end
-
-    -- Normal game update
-    update_player()
-    update_enemies()
-    update_bullets()
-
-    -- Check for collisions
-    if check_collisions() then
-      -- Game over - reset
-      init_game()
-    end
-  end
-end
-
-function _draw()
-  cls(1)
-
-  -- Draw player
-  circfill(player.x, player.y, 4, player.color)
-
-  -- Draw enemies
-  for enemy in all(enemies) do
-    circfill(enemy.x, enemy.y, 3, enemy.color)
-  end
-
-  -- Draw bullets
-  for bullet in all(bullets) do
-    circfill(bullet.x, bullet.y, 1, 10)
-  end
-
-  -- Draw UI
-  print("PICO-8 TEST FRAMEWORK", 2, 2, 7)
-  print("Phase: " .. test_get_phase(), 2, 10, 7)
-  print("Frame: " .. test_get_frame_count(), 2, 18, 7)
-
-  if test_is_completed() then
-    print("TEST COMPLETED", 2, 26, 11)
-  else
-    print("TEST RUNNING...", 2, 26, 8)
-  end
-
-  -- Instructions
-  print("Use arrow keys to move", 2, 120, 6)
-  print("Avoid red enemies", 2, 126, 6)
 end
