@@ -50,6 +50,7 @@ ARGUMENTS:
 
 OPTIONS:
     -h, --help      Show this help message
+    -c, --cart      Specify the test cartridge file (default: test_cart.p8)
     -l, --list      List available test phases (requires cartridge)
     -v, --version   Show version information
     --verbose       Enable verbose output
@@ -63,6 +64,9 @@ EXAMPLES:
 
     ./run_test.sh collision_test 60
         Run collision tests with 60 second timeout
+
+    ./run_test.sh -c my_test.p8
+        Run tests in my_test.p8 cartridge
 
     ./run_test.sh --list
         List all available test phases
@@ -105,6 +109,7 @@ PHASE="all"
 TIMEOUT=$DEFAULT_TIMEOUT
 VERBOSE=false
 LIST_PHASES=false
+CART_FILE="test_cart.p8"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -115,6 +120,11 @@ while [[ $# -gt 0 ]]; do
         -v|--version)
             echo "PICO-8 Test Framework Runner v${SCRIPT_VERSION}"
             exit 0
+            ;;
+        -c|--cart)
+            CART_FILE="$2"
+            shift
+            shift
             ;;
         -l|--list)
             LIST_PHASES=true
@@ -141,9 +151,6 @@ if ! [[ $TIMEOUT =~ ^[0-9]+$ ]] || [ $TIMEOUT -le 0 ]; then
     print_color $RED "Error: Invalid timeout '$TIMEOUT'. Must be a positive integer."
     exit 1
 fi
-
-# Default cartridge name (can be overridden)
-CART_FILE="test_cart.p8"
 
 # Check prerequisites
 check_pico8
