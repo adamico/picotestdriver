@@ -59,24 +59,25 @@ ARGUMENTS:
 OPTIONS:
     -h, --help      Show this help message
     -c, --cart      Specify the test cartridge file (default: test_cart.p8)
+    -d, --demo      Run the demo test cartridge (test_cart.p8 from this directory)
     -l, --list      List available test subtests (requires cartridge)
     -v, --version   Show version information
     --verbose       Enable verbose output
 
 EXAMPLES:
-    ./run_test.sh
-        Run all test subtests with default timeout
-
-    ./run_test.sh movement_test
-        Run only movement tests
-
-    ./run_test.sh collision_test 60
-        Run collision tests with 60 second timeout
+    ./run_test.sh -d
+        Run the demo test cartridge
 
     ./run_test.sh -c my_test.p8
         Run tests in my_test.p8 cartridge
 
-    ./run_test.sh --list
+    ./run_test.sh -c my_test.p8 movement_test
+        Run only movement tests
+
+    ./run_test.sh -c my_test.p8 collision_test 60
+        Run collision tests with 60 second timeout
+
+    ./run_test.sh -c my_test.p8 --list
         List all available test subtests
 
 REQUIREMENTS:
@@ -205,7 +206,9 @@ SUBTEST="all"
 TIMEOUT=$DEFAULT_TIMEOUT
 VERBOSE=false
 LIST_SUBTESTS=false
-CART_FILE="test_cart.p8"
+CART_FILE=""
+DEMO_MODE=false
+ARGS_PROVIDED=$#
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -220,6 +223,11 @@ while [[ $# -gt 0 ]]; do
         -c|--cart)
             CART_FILE="$2"
             shift
+            shift
+            ;;
+        -d|--demo)
+            DEMO_MODE=true
+            CART_FILE="$SCRIPT_DIR/test_cart.p8"
             shift
             ;;
         -l|--list)
@@ -241,6 +249,25 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Show usage if no arguments provided
+if [ $ARGS_PROVIDED -eq 0 ]; then
+    print_color $YELLOW "No arguments provided."
+    echo ""
+    echo "Usage: $0 [OPTIONS] [SUBTEST] [TIMEOUT]"
+    echo ""
+    echo "Quick start:"
+    echo "  $0 -d              Run the demo test cartridge"
+    echo "  $0 -c my_test.p8   Run tests from your cartridge"
+    echo "  $0 --help          Show full help"
+    echo ""
+    exit 1
+fi
+
+# Set default cartridge if none specified and not in demo mode
+if [ -z "$CART_FILE" ]; then
+    CART_FILE="test_cart.p8"
+fi
 
 # Validate timeout
 if ! [[ $TIMEOUT =~ ^[0-9]+$ ]] || [ $TIMEOUT -le 0 ]; then
