@@ -41,31 +41,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created `lib/README.md` - Shared library documentation
 - Updated README with architecture section and changelog management
 - Added prepare-commit-msg hook for changelog prompts
-## Project Context
-
-This framework was developed as part of the **obsi** PICO-8 game project, where complex boundary mechanics and physics required sophisticated testing capabilities. The framework evolved from manual testing to automated command-line execution, then was extracted into a reusable community tool.
-
-### Original Use Case
-- **Game**: One-button Space Invaders with risk/reward mechanics
-- **Challenge**: Complex boundary reversal physics with acceleration/deceleration
-- **Solution**: Automated testing with detailed debug output and frame-accurate simulation
-
-### Known Limitations
-- Function override system requires manual restoration
-- No exception handling (PICO-8 Lua limitation)
-- Single command-line parameter string
-- Manual test data cleanup required
-
-### Future Roadmap
-- Visual test results overlay in PICO-8
-- Screenshot comparison testing
-- Test result export functionality (JSON format)
-- CI/CD integration examples
-- Enhanced function override system with automatic restoration
-- Performance regression detection
-- Test coverage analysis
 
 ---
 
-*This changelog is maintained using [git-conventional-commits](https://github.com/qoomon/git-conventional-commits). 
-Run `scripts/generate_changelog.sh` to auto-generate entries from commits.*
+**About this project:** PICO-8 Automated Testing Framework - Developed as part of the [obsi](https://github.com/adamico/obsi) PICO-8 game project. See [docs/development_notes.md](docs/development_notes.md) for roadmap and design decisions.
+
+**Format:** This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+**Automation:** Maintained using conventional commits. Run `./scripts/generate_changelog.sh --auto-accept` to auto-generate entries from commits.
