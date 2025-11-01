@@ -8,14 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Features
-- add test file for changelog automation verification
-- improve changelog generation to properly merge [Unreleased] sections
+- None yet
 
 ### Bug Fixes
-- improve error handling in test runner
+- None yet
 
 ### Performance Improvements
 - None yet
+
+## [1.1.1] - 2025-11-01
+
+### Features
+- Improved changelog generation to properly merge [Unreleased] sections
+- Comprehensive test suite for changelog generation script (19 tests)
+
+### Bug Fixes
+- Added deduplication to changelog merge to prevent duplicate entries
+
+### Refactoring
+- Cleaned up CHANGELOG and moved roadmap to development_notes.md
+- Simplified CHANGELOG footer with concise references
+
+### Documentation
+- Created `scripts/README.md` documenting all scripts and testing workflow
+- Updated roadmap in `docs/development_notes.md`
 
 ## [1.1.0] - 2025-11-01
 
