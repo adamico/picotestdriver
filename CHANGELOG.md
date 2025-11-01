@@ -1,242 +1,248 @@
 # Changelog
 
+## [Unreleased] - 2025-11-01
+
+### Fixed
+- fix: clean up duplicate entries in CHANGELOG using changelog --clean tool
+
 ## [3.0.2] - 2025-11-01
+
+### Added
+- feat: add color formatting to all help text and command output
+- feat: add comprehensive edge case tests to demo cartridge
+- feat: add unified ptd command with subcommands
+- feat: add test file generator script
+- feat: add demo option and clean up demo cartridge
+- feat: add VERSION file as single source of truth
+- feat: auto-update README version badge during release
+- feat: remove [Unreleased] section from user-facing CHANGELOG
+- feat: add automatic CHANGELOG sync validation with git tags
+- feat: add --release flag with version section ordering fix
+- feat: add --release flag to automate version releases
+- feat: improve changelog generation to properly merge [Unreleased] sections
+- feat: add test file for changelog automation verification
+- feat: add auto-accept flag for non-interactive changelog generation
+- feat: implement working changelog automation with git log parsing
+- feat: add shared functions library for code consistency
+- feat: enhance --list option to check included .lua files and update docs
+- feat: add -c/--cart option to specify test cartridge file
+- feat: add comprehensive GitHub repository enhancements
+
+### Fixed
+- fix: improve input simulation utilities with test coverage
+- fix: improve test utilities and documentation
+- fix: subtest selection, completion messages, and timeout handling
+- fix: correct unreleased content extraction in release function
+- fix: add deduplication to changelog merge to prevent duplicate entries
+- fix: improve error handling in test runner
+- fix: cart metadata
+
+### Documentation
+- docs: clean up completed todo items
+- docs: update changelog for v3.0.1
+- docs: update documentation for new button state functions
+- docs: document extraction of changelog automation to standalone library
+- docs: update todo.md with completed improvements
+- docs: rename PICO-8 TEST FRAMEWORK to PicoTestDriver throughout
+- docs: update run_test.sh help to promote test generator
+- docs: document test file generator and update todo
+- docs: removed mention of obsi from changelog footer
+- docs: add semver and release workflow to copilot instructions
+- docs: simplify CHANGELOG header
+- docs: add AI agent workflow guide to project structure
+- docs: add comprehensive AI agent workflow guide
+- docs: add GitHub About section reference for repository setup
+- docs: add balanced guidance on AI-assisted development practices (Claude 4 > Grok)
+- docs: update documentation for v1.0.1 with development environment setup
+
+### Changed
+- refactor: remove changelog automation files (extracted to standalone library)
+- refactor: improve changelog format with categorized sections
+- refactor: remove old scripts and migrate to ptd command only
+- refactor: simplify --list output to show only subtest names
+- refactor: rename phases to subtests for clarity
+- refactor: clean up CHANGELOG and move roadmap to development_notes
+
+### Tests
+- test: add comprehensive tests for generate_test.sh
+- test: add coverage for demo flag, no-args behavior, and exit codes
+- test: add comprehensive test suite for new changelog format
+- test: add comprehensive test suite for changelog generation script
+- test: add comprehensive unit testing framework for run_test.sh
+
+### Build
+- build: release v3.0.0
+- build: prepare release v1.1.1
+- build: prepare release v1.1.0 with consolidated changelog
+
+### Chores
+- chore: release v3.0.2
+- chore: bump version to 3.0.1
+- chore: bump version to 2.0.2
+- chore: bump version to 2.0.1
+- chore: bump version to 2.0.0
+- chore: release version 1.3.0
+- chore: release version 1.1.3
+- chore: add remaining project files and complete initial setup
+- chore: add VS Code settings for PICO-8 development
+- chore: add git hooks and conventional commit configuration
+
+## [3.0.1] - 2025-11-01
 
 ### Documentation
 - docs: clean up completed todo items
 
-## [3.0.1] - 2025-11-01
+### Chores
+- chore: release v3.0.2
+
+## [3.0.0] - 2025-11-01
 
 ### Fixed
 - fix: improve input simulation utilities with test coverage
 
 ### Documentation
+- docs: update changelog for v3.0.1
 - docs: update documentation for new button state functions
-
-## [3.0.0] - 2025-11-01
-
-### Added
-- feat: add color formatting to all help text and command output
-- feat: add comprehensive edge case tests to demo cartridge
-
-### Fixed
-- fix: improve test utilities and documentation
-
-### Changed
-- refactor: extract changelog automation to standalone library (git-changelog-automation)
-- refactor: improve changelog format with categorized sections
-- refactor: remove bundled changelog scripts (now in git-changelog-automation)
-- refactor: remove changelog automation files (extracted to standalone library)
-
-### Performance
-- None yet
-- None yet
-
-### Documentation
-- Added contribution guidelines
-- Added prepare-commit-msg hook for changelog prompts
-- Architecture documentation
-- Complete usage guide and examples
-- Created `docs/ai_agent_workflow.md` - AI agent/CI workflow guide
-- Created `docs/changelog_automation.md` - Complete changelog automation guide
-- Created `lib/README.md` - Shared library documentation
-- Created `scripts/README.md` documenting all scripts and testing workflow
-- Development setup instructions
-- docs: add reference to git-changelog-automation for changelog generation
-- docs: create docs/changelog-automation.md with migration guide
-- docs: document extraction of changelog automation to standalone library
-- docs: update todo.md with completed improvements
-- Enhanced documentation with development workflow guide
-- Updated README with architecture section and changelog management
-- Updated roadmap in `docs/development_notes.md`
 
 ### Chores
 - chore: bump version to 3.0.1
 
-
-## [3.0.0] - 2025-11-01
-
-
-### Added
-
-### Fixed
-
-### Changed
-
-
-### Documentation
-- Added contribution guidelines
-- Added prepare-commit-msg hook for changelog prompts
-- Architecture documentation
-- Complete usage guide and examples
-- Created `docs/ai_agent_workflow.md` - AI agent/CI workflow guide
-- Created `docs/changelog_automation.md` - Complete changelog automation guide
-- Created `lib/README.md` - Shared library documentation
-- Created `scripts/README.md` documenting all scripts and testing workflow
-- Development setup instructions
-- Enhanced documentation with development workflow guide
-- Updated README with architecture section and changelog management
-- Updated roadmap in `docs/development_notes.md`
-
-
-
 ## [2.0.2] - 2025-11-01
 
-### Added
+### Documentation
+- docs: document extraction of changelog automation to standalone library
 
 ### Changed
+- refactor: remove changelog automation files (extracted to standalone library)
+- refactor: improve changelog format with categorized sections
+
+### Build
+- build: release v3.0.0
 
 ## [2.0.1] - 2025-11-01
 
 ### Added
+- feat: add color formatting to all help text and command output
 
-### Fixed
-
-### Documentation
-
-## [2.0.0] - 2025-11-01
-
-
-### BREAKING CHANGES
-- remove run_test.sh and generate_test.sh scripts (replaced by ptd command)
-- all functionality now accessible via unified `ptd` command
-
-### Features
-- complete migration to single `ptd` command interface
-- simplified codebase with single entry point
-- updated all tests to use ptd command (118/118 passing)
-
-### Migration Guide
-- `run_test.sh -c file.p8` → `ptd test -c file.p8`
-- `generate_test.sh -d tests -n x` → `ptd generate -d tests -n x`
-
-
-## [1.4.0] - 2025-11-01
-
-
-### Features
-- add unified `ptd` command with subcommand architecture (ptd test, ptd generate)
-- improve command-line interface with clearer help text and examples
-- add exit codes for better automation and CI/CD integration
-- maintain backward compatibility with run_test.sh and generate_test.sh
-
+### Chores
+- chore: bump version to 2.0.2
 
 ## [1.3.0] - 2025-11-01
 
+### Added
+- feat: add comprehensive edge case tests to demo cartridge
+- feat: add unified ptd command with subcommands
+- feat: add test file generator script
+- feat: add demo option and clean up demo cartridge
 
-### Features
-- add VERSION file as single source of truth
-- auto-update README version badge during release
+### Fixed
+- fix: improve test utilities and documentation
+- fix: subtest selection, completion messages, and timeout handling
 
+### Documentation
+- docs: update todo.md with completed improvements
+- docs: rename PICO-8 TEST FRAMEWORK to PicoTestDriver throughout
+- docs: update run_test.sh help to promote test generator
+- docs: document test file generator and update todo
+- docs: removed mention of obsi from changelog footer
+
+### Changed
+- refactor: remove old scripts and migrate to ptd command only
+- refactor: simplify --list output to show only subtest names
+- refactor: rename phases to subtests for clarity
+
+### Tests
+- test: add comprehensive tests for generate_test.sh
+- test: add coverage for demo flag, no-args behavior, and exit codes
+
+### Chores
+- chore: bump version to 2.0.1
+- chore: bump version to 2.0.0
 
 ## [1.2.0] - 2025-11-01
 
+### Added
+- feat: add VERSION file as single source of truth
+- feat: auto-update README version badge during release
 
-### Features
-- remove [Unreleased] section from user-facing CHANGELOG
+### Documentation
+- docs: add semver and release workflow to copilot instructions
 
+### Chores
+- chore: release version 1.3.0
 
 ## [1.1.3] - 2025-11-01
 
+### Added
+- feat: remove [Unreleased] section from user-facing CHANGELOG
 
-### Features
-- add automatic CHANGELOG sync validation with git tags
+### Fixed
+- fix: correct unreleased content extraction in release function
 
-### Bug Fixes
-- None yet
+### Documentation
+- docs: simplify CHANGELOG header
 
-### Performance Improvements
-- None yet
-
+### Tests
+- test: add comprehensive test suite for new changelog format
 
 ## [1.1.2] - 2025-11-01
 
+### Added
+- feat: add automatic CHANGELOG sync validation with git tags
 
-### Features
-- add --release flag to automate version releases
-
-### Bug Fixes
-- None yet
-
-### Performance Improvements
-- None yet
-
+### Chores
+- chore: release version 1.1.3
 
 ## [1.1.1] - 2025-11-01
 
-### Features
-- Improved changelog generation to properly merge [Unreleased] sections
-- Comprehensive test suite for changelog generation script (19 tests)
-
-### Bug Fixes
-- Added deduplication to changelog merge to prevent duplicate entries
-
-### Refactoring
-- Cleaned up CHANGELOG and moved roadmap to development_notes.md
-- Simplified CHANGELOG footer with concise references
-
-### Documentation
-- Created `scripts/README.md` documenting all scripts and testing workflow
-- Updated roadmap in `docs/development_notes.md`
+### Added
+- feat: add --release flag with version section ordering fix
+- feat: add --release flag to automate version releases
 
 ## [1.1.0] - 2025-11-01
 
-### Features
-- Shared functions library (`lib/test_functions.sh`) for code consistency and preventing code desync
-- Timeout parameter passing from shell to PICO-8 via `-p phase:timeout` format
-- Automatic test termination when timeout is reached
-- Changelog automation with `generate_changelog.sh` script
-- Auto-accept flag (`--auto-accept`, `-y`, `--non-interactive`) for AI agents and CI/CD
-- Architecture section in README documenting shared library design
-- AI agent workflow guide with complete automation examples
-- Enhanced `--list` option to check included .lua files
-- `-c`/`--cart` option to specify test cartridge file
-- Comprehensive GitHub repository enhancements
+### Added
+- feat: improve changelog generation to properly merge [Unreleased] sections
+- feat: add test file for changelog automation verification
 
-### Bug Fixes
-- Fixed code desync between `run_test.sh`, `run_test_testable.sh`, and `test_helper.sh`
-- Corrected `build_command()` function signature consistency across test suite
-- Fixed cart metadata
+### Fixed
+- fix: add deduplication to changelog merge to prevent duplicate entries
+- fix: improve error handling in test runner
 
-### Documentation
-- Created `docs/changelog_automation.md` - Complete changelog automation guide
-- Created `docs/ai_agent_workflow.md` - AI agent/CI workflow guide
-- Created `lib/README.md` - Shared library documentation
-- Updated README with architecture section and changelog management
-- Added prepare-commit-msg hook for changelog prompts
+### Changed
+- refactor: clean up CHANGELOG and move roadmap to development_notes
 
-## [1.0.1] - 2025-11-01
+### Tests
+- test: add comprehensive test suite for changelog generation script
 
-### Features
-- Development environment setup with git hooks for conventional commits
-- Automated commit message validation
-- Git hooks installation script
+### Build
+- build: prepare release v1.1.1
 
-### Documentation
-- Enhanced documentation with development workflow guide
-- Added contribution guidelines
+## [1.0.1] - 2025-10-31
 
-## [1.0.0] - 2025-11-01
+### Added
+- feat: add auto-accept flag for non-interactive changelog generation
+- feat: implement working changelog automation with git log parsing
+- feat: add shared functions library for code consistency
+- feat: enhance --list option to check included .lua files and update docs
+- feat: add -c/--cart option to specify test cartridge file
+- feat: add comprehensive GitHub repository enhancements
 
-### Features
-- Initial release of PICO-8 Automated Testing Framework
-- Core test execution with `run_test.sh` script
-- Testable architecture with `run_test_testable.sh`
-- Test helper utilities for PICO-8
-- Support for custom timeout values
-- Phase-based test execution
-- Exit code propagation from PICO-8 to shell
-- Comprehensive README documentation
+### Fixed
+- fix: cart metadata
 
 ### Documentation
-- Complete usage guide and examples
-- Architecture documentation
-- Development setup instructions
+- docs: add AI agent workflow guide to project structure
+- docs: add comprehensive AI agent workflow guide
+- docs: add GitHub About section reference for repository setup
+- docs: add balanced guidance on AI-assisted development practices (Claude 4 > Grok)
 
----
+### Tests
+- test: add comprehensive unit testing framework for run_test.sh
 
-**About this project:** PICO-8 Automated Testing Framework. See [docs/development_notes.md](docs/development_notes.md) for roadmap and design decisions.
+### Build
+- build: prepare release v1.1.0 with consolidated changelog
 
-**Format:** This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Chores
+- chore: add remaining project files and complete initial setup
 
-**Automation:** Maintained using conventional commits. Run `./scripts/generate_changelog.sh --auto-accept` to auto-generate entries from commits.
