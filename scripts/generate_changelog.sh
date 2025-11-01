@@ -158,14 +158,14 @@ update_changelog() {
     local existing_fixes=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Bug Fixes/,/^### /p' | grep "^- " || true)
     local existing_perf=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Performance Improvements/,/^### /p' | grep "^- " || true)
     
-    # Merge: Keep existing non-placeholder entries, add new ones
+    # Merge: Keep existing non-placeholder entries, add new ones (deduplicate)
     local merged_features=""
     if [ -n "$existing_features" ] && ! echo "$existing_features" | grep -q "None yet"; then
         merged_features="$existing_features"
     fi
     if [ -n "$new_features" ]; then
         if [ -n "$merged_features" ]; then
-            merged_features="$merged_features"$'\n'"$new_features"
+            merged_features=$(echo -e "$merged_features\n$new_features" | sort -u)
         else
             merged_features="$new_features"
         fi
@@ -177,7 +177,7 @@ update_changelog() {
     fi
     if [ -n "$new_fixes" ]; then
         if [ -n "$merged_fixes" ]; then
-            merged_fixes="$merged_fixes"$'\n'"$new_fixes"
+            merged_fixes=$(echo -e "$merged_fixes\n$new_fixes" | sort -u)
         else
             merged_fixes="$new_fixes"
         fi
@@ -189,7 +189,7 @@ update_changelog() {
     fi
     if [ -n "$new_perf" ]; then
         if [ -n "$merged_perf" ]; then
-            merged_perf="$merged_perf"$'\n'"$new_perf"
+            merged_perf=$(echo -e "$merged_perf\n$new_perf" | sort -u)
         else
             merged_perf="$new_perf"
         fi

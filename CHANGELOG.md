@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 - add test file for changelog automation verification
+- improve changelog generation to properly merge [Unreleased] sections
 
 ### Bug Fixes
 - improve error handling in test runner
