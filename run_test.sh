@@ -80,6 +80,15 @@ EXAMPLES:
     ./run_test.sh -c my_test.p8 --list
         List all available test subtests
 
+GETTING STARTED:
+    Generate test files for your project:
+        ./generate_test.sh -d tests -n my_game_test
+
+    Then run your tests:
+        ./run_test.sh -c tests/my_game_test.p8
+
+    See 'generate_test.sh --help' for more options.
+
 REQUIREMENTS:
     - PICO-8 executable must be in PATH
     - Test cartridge must include test_framework.lua
@@ -91,7 +100,7 @@ EXIT CODES:
     3   Test cartridge not found
     124 Timeout reached
 
-For more information, visit: https://github.com/your-repo/pico8-test-framework
+For more information, visit: https://github.com/adamico/picotestdriver
 EOF
 }
 
@@ -257,9 +266,12 @@ if [ $ARGS_PROVIDED -eq 0 ]; then
     echo "Usage: $0 [OPTIONS] [SUBTEST] [TIMEOUT]"
     echo ""
     echo "Quick start:"
-    echo "  $0 -d              Run the demo test cartridge"
-    echo "  $0 -c my_test.p8   Run tests from your cartridge"
-    echo "  $0 --help          Show full help"
+    echo "  $0 -d                         Run the demo test cartridge"
+    echo "  $0 -c my_test.p8              Run tests from your cartridge"
+    echo "  $0 --help                     Show full help"
+    echo ""
+    echo "New to testing? Generate test files:"
+    echo "  ./generate_test.sh -d tests -n my_game_test"
     echo ""
     exit 1
 fi
