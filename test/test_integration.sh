@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Integration tests for run_test.sh script behavior
+# Integration tests for ptd command behavior
 # Note: test_helper.sh is sourced by the test runner
 
 echo "Testing script help output..."

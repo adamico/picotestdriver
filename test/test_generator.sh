@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Tests for generate_test.sh script
+# Tests for ptd generate command
 # Note: test_helper.sh is sourced by the test runner
 
 echo "Testing test generator script..."
@@ -17,20 +17,20 @@ cleanup_test_dir() {
 trap cleanup_test_dir EXIT
 
 echo
-echo "Testing generator script existence and permissions..."
+echo "Testing generator command existence and permissions..."
 
-# Test that generator script exists
-if [ -f "./generate_test.sh" ]; then
-    assert_true 0 "generate_test.sh should exist"
+# Test that ptd command exists
+if [ -f "./ptd" ]; then
+    assert_true 0 "ptd should exist"
 else
-    assert_true 1 "generate_test.sh should exist"
+    assert_true 1 "ptd should exist"
 fi
 
-# Test that generator is executable
-if [ -x "./generate_test.sh" ]; then
-    assert_true 0 "generate_test.sh should be executable"
+# Test that ptd is executable
+if [ -x "./ptd" ]; then
+    assert_true 0 "ptd should be executable"
 else
-    assert_true 1 "generate_test.sh should be executable"
+    assert_true 1 "ptd should be executable"
 fi
 
 echo
@@ -38,7 +38,7 @@ echo "Testing basic file generation..."
 
 # Test generating files with defaults
 mkdir -p "$TEST_GEN_DIR"
-./generate_test.sh -d "$TEST_GEN_DIR" -n basic_test -s "test1,test2" -t 10 --framework-path test_framework.lua > /dev/null 2>&1
+./ptd generate -d "$TEST_GEN_DIR" -n basic_test -s "test1,test2" -t 10 --framework-path test_framework.lua > /dev/null 2>&1
 exit_code=$?
 
 assert_equals "0" "$exit_code" "generator should exit with code 0"
@@ -115,7 +115,7 @@ echo "Testing custom subtest generation..."
 # Clean up and regenerate with different subtests
 rm -rf "$TEST_GEN_DIR"
 mkdir -p "$TEST_GEN_DIR"
-./generate_test.sh -d "$TEST_GEN_DIR" -n custom_test -s "player,enemy,bullet,collision" -t 30 --framework-path test_framework.lua > /dev/null 2>&1
+./ptd generate -d "$TEST_GEN_DIR" -n custom_test -s "player,enemy,bullet,collision" -t 30 --framework-path test_framework.lua > /dev/null 2>&1
 
 if [ -f "$TEST_GEN_DIR/custom_test.lua" ]; then
     custom_content=$(cat "$TEST_GEN_DIR/custom_test.lua")
@@ -155,13 +155,13 @@ echo "Testing invalid timeout handling..."
 # Test with invalid timeout (should fail)
 rm -rf "$TEST_GEN_DIR"
 mkdir -p "$TEST_GEN_DIR"
-./generate_test.sh -d "$TEST_GEN_DIR" -n invalid_test -t 0 --framework-path test_framework.lua > /dev/null 2>&1
+./ptd generate -d "$TEST_GEN_DIR" -n invalid_test -t 0 --framework-path test_framework.lua > /dev/null 2>&1
 exit_code=$?
 
 assert_equals "1" "$exit_code" "generator should reject zero timeout"
 
 # Test with non-numeric timeout
-./generate_test.sh -d "$TEST_GEN_DIR" -n invalid_test -t abc --framework-path test_framework.lua > /dev/null 2>&1
+./ptd generate -d "$TEST_GEN_DIR" -n invalid_test -t abc --framework-path test_framework.lua > /dev/null 2>&1
 exit_code=$?
 
 assert_equals "1" "$exit_code" "generator should reject non-numeric timeout"
@@ -170,7 +170,7 @@ echo
 echo "Testing help option..."
 
 # Test that help displays without errors
-help_output=$(./generate_test.sh --help 2>&1)
+help_output=$(./ptd generate --help 2>&1)
 exit_code=$?
 
 assert_equals "0" "$exit_code" "generator --help should exit with code 0"

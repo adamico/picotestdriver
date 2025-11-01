@@ -29,11 +29,11 @@ PICO-8 Automated Testing Framework Runner v${SCRIPT_VERSION}
 This script runs PICO-8 cartridges with automated testing capabilities.
 
 USAGE:
-    ./run_test.sh [OPTIONS] [PHASE] [TIMEOUT]
+    ./ptd test [OPTIONS] [SUBTEST] [TIMEOUT]
 
 ARGUMENTS:
-    PHASE       Test phase to run (default: all)
-                Common phases: movement, collision, input, boundary
+    SUBTEST     Test subtest to run (default: all)
+                Common subtests: movement, collision, input, boundary
     TIMEOUT     Maximum runtime in seconds (default: ${DEFAULT_TIMEOUT})
 
 OPTIONS:
@@ -44,20 +44,20 @@ OPTIONS:
     --verbose       Enable verbose output
 
 EXAMPLES:
-    ./run_test.sh
-        Run all test phases with default timeout
+    ./ptd test -d
+        Run the demo test cartridge
 
-    ./run_test.sh movement_test
+    ./ptd test -c my_test.p8 movement
         Run only movement tests
 
-    ./run_test.sh collision_test 60
+    ./ptd test -c my_test.p8 collision 60
         Run collision tests with 60 second timeout
 
-    ./run_test.sh -c my_test.p8
-        Run tests in my_test.p8 cartridge
+    ./ptd test -c my_test.p8
+        Run all tests in my_test.p8 cartridge
 
-    ./run_test.sh --list
-        List all available test phases
+    ./ptd test -c my_test.p8 --list
+        List all available test subtests
 
 REQUIREMENTS:
     - PICO-8 executable must be in PATH

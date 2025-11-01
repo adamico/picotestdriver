@@ -240,19 +240,7 @@ The `ptd` command provides two main subcommands:
 ./ptd help generate
 ```
 
-#### Backward Compatibility
 
-The old `run_test.sh` and `generate_test.sh` scripts are still available for backward compatibility:
-
-```bash
-# Old style (still works)
-./run_test.sh -c my_test.p8
-./generate_test.sh -d tests -n my_game
-
-# New style (recommended)
-./ptd test -c my_test.p8
-./ptd generate -d tests -n my_game
-```
 
 #### Exit Codes
 

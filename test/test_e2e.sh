@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# End-to-end tests for run_test.sh script
+# End-to-end tests for ptd command
 # Note: test_helper.sh is sourced by the test runner
 
 echo "Testing main function with help flag..."

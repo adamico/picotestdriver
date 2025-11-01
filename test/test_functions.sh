@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Unit tests for run_test.sh functions
+# Unit tests for ptd command functions
 # Note: test_helper.sh is sourced by the test runner
 
 echo "Testing print_color function..."
