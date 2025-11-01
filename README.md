@@ -183,10 +183,11 @@ test_assert(condition, "Should be true")
 test_assert_equal(actual, expected, "Values should match")
 test_assert_in_range(value, 0, 100, "Value out of range")
 
--- Input simulation
-test_press_button(0)    -- Left button
-test_release_button(0)  -- Release left button
-test_hold_button(0, 30) -- Hold for 30 frames
+-- Button state utilities (for testable input systems)
+test_set_button_state(0, true)   -- Mark button 0 as pressed
+test_set_button_state(0, false)  -- Mark button 0 as released
+local state = test_get_button_state(0)  -- Get override state (or nil)
+test_clear_button_states()       -- Clear all overrides
 
 -- Timing
 test_start_timer()
@@ -322,8 +323,9 @@ function test_player_movement()
     -- Test initial state
     test_assert_equal(player.x, 64, "Player starts at center")
 
-    -- Simulate input and update
-    test_press_button(1)  -- Right button
+    -- Simulate input with testable wrapper
+    -- (Requires game code to check test_get_button_state())
+    test_set_button_state(1, true)  -- Right button
     update_player()
 
     -- Verify movement
@@ -541,14 +543,29 @@ end
 ### Input Testing
 
 ```lua
+-- Note: PICO-8's btn() reads hardware directly and can't be mocked.
+-- Use a testable input wrapper in your game:
+
+function my_btn(b)
+    -- Check for test override first
+    if test_get_button_state then
+        local override = test_get_button_state(b)
+        if override ~= nil then return override end
+    end
+    return btn(b)
+end
+
 function test_button_handling()
-    -- Test button press
-    test_press_button(0)
-    test_assert_true(btn(0), "Button press detected")
+    -- Test button state override
+    test_set_button_state(0, true)
+    test_assert_true(my_btn(0), "Button override works")
 
     -- Test button release
-    test_release_button(0)
-    test_assert_false(btn(0), "Button release detected")
+    test_set_button_state(0, false)
+    test_assert_false(my_btn(0), "Button release works")
+    
+    -- Clear overrides
+    test_clear_button_states()
 end
 ```
 

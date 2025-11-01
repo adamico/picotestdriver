@@ -74,8 +74,8 @@ function test_movement()
     player.x = 64
     player.y = 64
 
-    -- Test movement
-    test_press_button(1)  -- Right
+    -- Test movement (requires testable input wrapper in game)
+    test_set_button_state(1, true)  -- Right
     update_player()
     test_assert(player.x > 64, "Player should move right")
 
@@ -155,7 +155,7 @@ function test_movement()
     init_game()
     test_assert_equal(player.x, 64, "Player starts at center")
 
-    test_press_button(1)  -- Right
+    test_set_button_state(1, true)  -- Right
     update_player()
     test_assert(player.x > 64, "Player moves right")
 
@@ -257,16 +257,17 @@ end
 function test_input_sequence()
     test_log("Testing input sequences", "info")
 
-    -- Test jump sequence
-    test_press_button(2)    -- Up (jump)
-    test_wait_frames(10)    -- Hold for jump
-    test_release_button(2)  -- Release
+    -- Test jump sequence (requires testable input wrapper)
+    test_set_button_state(2, true)     -- Up (jump)
+    test_wait_frames(10, function()    -- Hold for jump
+        test_set_button_state(2, false)  -- Release
+    end)
 
     test_assert(player.jumping, "Player starts jumping")
-    test_wait_frames(20)
-    test_assert_false(player.jumping, "Jump completes")
-
-    test_complete()
+    test_wait_frames(20, function()
+        test_assert_false(player.jumping, "Jump completes")
+        test_complete()
+    end)
 end
 ```
 
@@ -357,7 +358,7 @@ Example migration:
 ```lua
 function test_movement()
     init_game()
-    test_press_button(1)
+    test_set_button_state(1, true)
     update_player()
     test_assert(player.x > 64, "Player moves right")
     test_complete()
