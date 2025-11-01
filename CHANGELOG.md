@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.1] - 2025-11-01
+
+### Features
+- add comprehensive edge case tests to demo cartridge (assertions, timing, edge cases subtests)
+
+### Bug Fixes
+- remove hardcoded version references from test_framework.lua and test_utils.lua
+- replace emoticons (✓/✗) with ASCII text ([PASS]/[FAIL]) to fix katakana rendering in PICO-8
+- implement proper memory tracking using stat(0) in test_log_memory_usage()
+- add CPU usage tracking with test_log_cpu_usage() using stat(1)
+
+### Documentation
+- update README troubleshooting sections with ptd command syntax
+- document new test_log_cpu_usage() function in README
+- update todo.md with completed improvements
+
 ## [2.0.0] - 2025-11-01
 
 
