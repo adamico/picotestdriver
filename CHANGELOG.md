@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0] - 2025-11-01
+
+
+### BREAKING CHANGES
+- remove run_test.sh and generate_test.sh scripts (replaced by ptd command)
+- all functionality now accessible via unified `ptd` command
+
+### Features
+- complete migration to single `ptd` command interface
+- simplified codebase with single entry point
+- updated all tests to use ptd command (118/118 passing)
+
+### Migration Guide
+- `run_test.sh -c file.p8` → `ptd test -c file.p8`
+- `generate_test.sh -d tests -n x` → `ptd generate -d tests -n x`
+
+
 ## [1.4.0] - 2025-11-01
 
 
