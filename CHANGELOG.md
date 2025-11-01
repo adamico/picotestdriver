@@ -1,16 +1,5 @@
 # Changelog
 
-## [Unreleased]
-
-### Features
-- None yet
-
-### Bug Fixes
-- None yet
-
-### Performance Improvements
-- None yet
-
 ## [1.1.3] - 2025-11-01
 
 

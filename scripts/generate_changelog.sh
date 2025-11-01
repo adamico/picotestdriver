@@ -235,15 +235,15 @@ update_changelog() {
         print_color "$GREEN" "Created backup: $CHANGELOG_BACKUP" >&2
     fi
     
-    # Read generated content (should be a new [Unreleased] section)
+    # Read generated content
     local new_features=$(sed -n '/### Features/,/^$/p' "$generated_file" | grep -v "^### Features" | grep -v "^$" || true)
     local new_fixes=$(sed -n '/### Bug Fixes/,/^$/p' "$generated_file" | grep -v "^### Bug Fixes" | grep -v "^$" || true)
     local new_perf=$(sed -n '/### Performance Improvements/,/^$/p' "$generated_file" | grep -v "^### Performance Improvements" | grep -v "^$" || true)
     
-    # Extract existing [Unreleased] content from current changelog
-    local existing_features=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Features/,/^### /p' | grep "^- " || true)
-    local existing_fixes=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Bug Fixes/,/^### /p' | grep "^- " || true)
-    local existing_perf=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Performance Improvements/,/^### /p' | grep "^- " || true)
+    # Extract existing unreleased content (between header and first version, or between [Unreleased] and first version for backwards compat)
+    local existing_features=$(sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | sed -n '/### Features/,/^### \|^## \[/p' | grep "^- " || true)
+    local existing_fixes=$(sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | sed -n '/### Bug Fixes/,/^### \|^## \[/p' | grep "^- " || true)
+    local existing_perf=$(sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | sed -n '/### Performance Improvements/,/^### \|^## \[/p' | grep "^- " || true)
     
     # Merge: Keep existing non-placeholder entries, add new ones (deduplicate)
     local merged_features=""
@@ -282,38 +282,36 @@ update_changelog() {
         fi
     fi
     
-    # Create new changelog with merged [Unreleased]
+    # Create new changelog with merged unreleased content
     {
         echo "# Changelog"
         echo ""
-        echo "All notable changes to this project will be documented in this file."
-        echo ""
-        echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),"
-        echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
-        echo ""
-        echo "## [Unreleased]"
-        echo ""
-        echo "### Features"
-        if [ -n "$merged_features" ]; then
-            echo "$merged_features"
-        else
-            echo "- None yet"
+        
+        # Only show unreleased changes if there's actual content (not placeholders)
+        local has_content=false
+        if [ -n "$merged_features" ] || [ -n "$merged_fixes" ] || [ -n "$merged_perf" ]; then
+            has_content=true
         fi
-        echo ""
-        echo "### Bug Fixes"
-        if [ -n "$merged_fixes" ]; then
-            echo "$merged_fixes"
-        else
-            echo "- None yet"
+        
+        if $has_content; then
+            if [ -n "$merged_features" ]; then
+                echo "### Features"
+                echo "$merged_features"
+                echo ""
+            fi
+            
+            if [ -n "$merged_fixes" ]; then
+                echo "### Bug Fixes"
+                echo "$merged_fixes"
+                echo ""
+            fi
+            
+            if [ -n "$merged_perf" ]; then
+                echo "### Performance Improvements"
+                echo "$merged_perf"
+                echo ""
+            fi
         fi
-        echo ""
-        echo "### Performance Improvements"
-        if [ -n "$merged_perf" ]; then
-            echo "$merged_perf"
-        else
-            echo "- None yet"
-        fi
-        echo ""
         
         # Append all version sections (everything between first [Unreleased] and Project Context)
         if [ -f "$CHANGELOG_FILE" ]; then
@@ -380,10 +378,10 @@ release_version() {
     # Remove 'v' prefix if present
     version="${version#v}"
     
-    print_color "$BLUE" "Releasing [Unreleased] as version $version ($release_date)..." >&2
+    print_color "$BLUE" "Releasing unreleased changes as version $version ($release_date)..." >&2
     
-    # Check if [Unreleased] has content
-    local unreleased_content=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | grep "^- " | grep -v "None yet" || true)
+    # Check if there's unreleased content (between header and first version)
+    local unreleased_content=$(sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | grep "^- " || true)
     
     if [ -z "$unreleased_content" ]; then
         print_color "$YELLOW" "Warning: [Unreleased] section has no content to release" >&2
@@ -394,7 +392,7 @@ release_version() {
                 return 1
             fi
         else
-            print_color "$GREEN" "Auto-accepting empty [Unreleased] (non-interactive mode)" >&2
+            print_color "$GREEN" "Auto-accepting empty content (non-interactive mode)" >&2
         fi
     fi
     
@@ -407,31 +405,17 @@ release_version() {
         # Header
         echo "# Changelog"
         echo ""
-        echo "All notable changes to this project will be documented in this file."
-        echo ""
-        echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),"
-        echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
-        echo ""
         
-        # New empty [Unreleased]
-        echo "## [Unreleased]"
-        echo ""
-        echo "### Features"
-        echo "- None yet"
-        echo ""
-        echo "### Bug Fixes"
-        echo "- None yet"
-        echo ""
-        echo "### Performance Improvements"
-        echo "- None yet"
-        echo ""
-        
-        # Convert old [Unreleased] to new version
+        # Convert unreleased content (between header and first version) to new version
         echo "## [$version] - $release_date"
         echo ""
-        sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | \
-            sed '1d;$d' | \
+        
+        # Extract content between header and first version (or between [Unreleased] and first version for backwards compat)
+        sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | \
+            sed '1,/^# Changelog/d' | \
+            sed '/^## \[[0-9]/d' | \
             sed '/^## \[Unreleased\]/d'
+        
         echo ""
         
         # Append all existing version sections
@@ -443,7 +427,7 @@ release_version() {
     } > "$CHANGELOG_FILE.new"
     
     mv "$CHANGELOG_FILE.new" "$CHANGELOG_FILE"
-    print_color "$GREEN" "Released [Unreleased] as [$version]" >&2
+    print_color "$GREEN" "Released as [$version]" >&2
     
     return 0
 }
