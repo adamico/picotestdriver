@@ -1,22 +1,44 @@
 # Changelog
 
-## [Unreleased]
+## [3.0.0] - 2025-11-01
+
+
+### Added
+- feat: add color formatting to all help text and command output
+- feat: add comprehensive edge case tests to demo cartridge
+
+### Fixed
+- fix: improve test utilities and documentation
 
 ### Changed
 - refactor: extract changelog automation to standalone library (git-changelog-automation)
+- refactor: improve changelog format with categorized sections
 - refactor: remove bundled changelog scripts (now in git-changelog-automation)
+- refactor: remove changelog automation files (extracted to standalone library)
 
-### Removed
-- scripts/generate_changelog.sh (moved to git-changelog-automation)
-- scripts/test_generate_changelog.sh (moved to git-changelog-automation)
-- scripts/test_changelog_new_format.sh (moved to git-changelog-automation)
-- scripts/install_hooks.sh (functionality in git-changelog-automation)
-- .git-hooks/ directory (git hooks now in git-changelog-automation)
-- git-conventional-commits.yaml (example config in git-changelog-automation)
+### Performance
+- None yet
+- None yet
 
 ### Documentation
+- Added contribution guidelines
+- Added prepare-commit-msg hook for changelog prompts
+- Architecture documentation
+- Complete usage guide and examples
+- Created `docs/ai_agent_workflow.md` - AI agent/CI workflow guide
+- Created `docs/changelog_automation.md` - Complete changelog automation guide
+- Created `lib/README.md` - Shared library documentation
+- Created `scripts/README.md` documenting all scripts and testing workflow
+- Development setup instructions
 - docs: add reference to git-changelog-automation for changelog generation
 - docs: create docs/changelog-automation.md with migration guide
+- docs: document extraction of changelog automation to standalone library
+- docs: update todo.md with completed improvements
+- Enhanced documentation with development workflow guide
+- Updated README with architecture section and changelog management
+- Updated roadmap in `docs/development_notes.md`
+
+
 
 ## [2.0.2] - 2025-11-01
 
