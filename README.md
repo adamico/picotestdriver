@@ -1,6 +1,6 @@
 # PicoTestDriver
 
-[![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)](https://github.com/adamico/picotestdriver)
+[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](https://github.com/adamico/picotestdriver)
 [![PICO-8](https://img.shields.io/badge/PICO--8-0.2.5+-red.svg)](https://www.lexaloffle.com/pico-8.php)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -423,7 +423,7 @@ picotestdriver/
 ## Example Output
 
 ```
-=== PicoTestDriver v2.0.1 ===
+=== PicoTestDriver v2.0.2 ===
 Cartridge: test_cart.p8
 Subtest: movement
 Timeout: 30s
