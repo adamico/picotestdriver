@@ -428,26 +428,32 @@ release_version() {
     mv "$CHANGELOG_FILE.new" "$CHANGELOG_FILE"
     print_color "$GREEN" "Released as [$version]" >&2
     
-    # Update README version badge
-    update_readme_version "$version"
+    # Update VERSION file and README badge
+    update_version_files "$version"
     
     return 0
 }
 
-# Update README version badge
-update_readme_version() {
+# Update VERSION file and README version badge
+update_version_files() {
     local version=$1
+    local version_file="$PROJECT_DIR/VERSION"
     local readme_file="$PROJECT_DIR/README.md"
     
+    # Remove 'v' prefix if present
+    version="${version#v}"
+    
+    # Update VERSION file (single source of truth)
+    print_color "$BLUE" "Updating VERSION file to $version..." >&2
+    echo "$version" > "$version_file"
+    print_color "$GREEN" "VERSION file updated to $version" >&2
+    
+    # Update README version badge
     if [ ! -f "$readme_file" ]; then
         print_color "$YELLOW" "Warning: README.md not found, skipping version badge update" >&2
         return 0
     fi
     
-    # Remove 'v' prefix if present
-    version="${version#v}"
-    
-    # Update the version badge
     if grep -q "version-[0-9]\+\.[0-9]\+\.[0-9]\+-blue" "$readme_file"; then
         print_color "$BLUE" "Updating README.md version badge to $version..." >&2
         sed -i "s/version-[0-9]\+\.[0-9]\+\.[0-9]\+-blue/version-$version-blue/g" "$readme_file"

@@ -2,7 +2,6 @@
 
 # PICO-8 Automated Testing Framework Runner
 # Allows running specific test phases by passing parameters to PICO-8
-# Version 1.0.0
 #
 # Usage: ./run_test.sh [phase] [timeout] [--help]
 #   phase: Test phase name (default: all)
@@ -16,7 +15,16 @@
 #   ./run_test.sh --help             # Show help
 
 # Configuration
-SCRIPT_VERSION="1.0.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERSION_FILE="$SCRIPT_DIR/VERSION"
+
+# Read version from VERSION file if it exists, otherwise use fallback
+if [ -f "$VERSION_FILE" ]; then
+    SCRIPT_VERSION=$(cat "$VERSION_FILE")
+else
+    SCRIPT_VERSION="1.0.0"
+fi
+
 DEFAULT_TIMEOUT=30
 
 # Colors for output
