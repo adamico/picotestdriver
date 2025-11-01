@@ -1,6 +1,6 @@
 # PicoTestDriver
 
-[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](https://github.com/adamico/picotestdriver)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/adamico/picotestdriver)
 [![PICO-8](https://img.shields.io/badge/PICO--8-0.2.5+-red.svg)](https://www.lexaloffle.com/pico-8.php)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -622,27 +622,23 @@ Example: `git commit -m "feat: add performance testing utilities"`
 
 ### Changelog Management
 
+> **Note**: As of v2.0.2, the changelog automation tools have been extracted to a standalone library: [git-changelog-automation](https://github.com/adamico/git-changelog-automation)
+
 The project uses automated changelog generation from conventional commits:
 
 ```bash
-# Install git hooks (includes commit-msg validation and changelog prompt)
-./scripts/install_hooks.sh
+# Option 1: Use standalone git-changelog-automation (recommended)
+changelog                    # Generate from last tag
+changelog --release 1.2.0    # Release version
+changelog --install-hooks    # Install git hooks
 
-# Generate changelog from commits (interactive)
+# Option 2: Use bundled scripts (backward compatibility)
 ./scripts/generate_changelog.sh
-
-# Generate from specific version
 ./scripts/generate_changelog.sh v1.0.0
-
-# Generate between versions
-./scripts/generate_changelog.sh v1.0.0 v1.1.0
-
-# Auto-accept for AI agents/CI (non-interactive)
 ./scripts/generate_changelog.sh --auto-accept
-./scripts/generate_changelog.sh -y v1.0.0
 ```
 
-The `prepare-commit-msg` hook will automatically prompt you to update the changelog when making release-related commits. Use `--auto-accept` for automated workflows and AI agents.
+See [docs/changelog-automation.md](docs/changelog-automation.md) for migration details and documentation.
 
 ### VS Code Configuration
 

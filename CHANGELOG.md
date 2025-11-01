@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- refactor: extract changelog automation to standalone library (git-changelog-automation)
+- docs: add reference to git-changelog-automation for changelog generation
+
 ## [2.0.2] - 2025-11-01
 
 ### Added
