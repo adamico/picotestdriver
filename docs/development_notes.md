@@ -140,7 +140,6 @@ timeout 30 pico8 -run test.p8 -p "$1"
 ## Future Enhancement Possibilities
 
 ### Short Term
-- Visual test results overlay in PICO-8
 - Screenshot comparison for UI testing  
 - Test result export functionality (JSON format)
 - Integration with external test runners

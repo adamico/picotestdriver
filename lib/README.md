@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `lib/test_functions.sh` file contains shared functions used across the PICO-8 test framework. This prevents code duplication and desync errors between different components.
+The `lib/test_functions.sh` file contains shared functions used across PicoTestDriver. This prevents code duplication and desync errors between different components.
 
 ## Architecture
 

@@ -351,8 +351,8 @@ lib/picotestdriver/
 │   ├── test_helper.sh              # Test utilities
 │   ├── test_integration.sh         # Integration tests
 │   └── test_runner.sh              # Test suite runner
-├── test_framework.lua              # PICO-8 test framework core
-└── test_utils.lua                  # PICO-8 test utilities
+├── test_framework.lua              # PicoTestDriver framework core
+└── test_utils.lua                  # PicoTestDriver utilities
 ```
 
 #### Shared Functions Library (`lib/test_functions.sh`)
@@ -448,7 +448,7 @@ pico8-test-framework/
 ## 🎮 Example Output
 
 ```
-=== PICO-8 Test Framework Runner v1.0.0 ===
+=== PicoTestDriver v1.0.0 ===
 Cartridge: test_cart.p8
 Phase: movement_test
 Timeout: 30s

@@ -1,6 +1,6 @@
 # Unit Testing for run_test.sh
 
-This directory contains unit tests for the PICO-8 testing framework runner script.
+This directory contains unit tests for the PicoTestDriver framework runner script.
 
 ## Overview
 

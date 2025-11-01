@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PICO-8 Test File Generator
+# PicoTestDriver Test File Generator
 # Generates test.p8 cartridge and test.lua files with boilerplate code
 
 set -e
@@ -20,9 +20,9 @@ print_color() {
 
 show_help() {
     cat << EOF
-PICO-8 Test File Generator
+PicoTestDriver Test File Generator
 
-Generates test cartridge and test file with boilerplate code.
+Generate test cartridge and test files with boilerplate code.
 
 USAGE:
     ./generate_test.sh [OPTIONS]
@@ -111,7 +111,7 @@ mkdir -p "$OUTPUT_DIR"
 P8_FILE="$OUTPUT_DIR/${TEST_NAME}.p8"
 LUA_FILE="$OUTPUT_DIR/${TEST_NAME}.lua"
 
-print_color $BLUE "=== PICO-8 Test File Generator ==="
+print_color $BLUE "=== PicoTestDriver Test File Generator ==="
 echo "Output directory: $OUTPUT_DIR"
 echo "Test name: $TEST_NAME"
 echo "Subtests: $SUBTESTS"

@@ -16,7 +16,7 @@ echo
 echo "Testing script version output..."
 
 # Mock the version output capture
-version_output=$(echo "PICO-8 Test Framework Runner v${SCRIPT_VERSION}")
+version_output=$(echo "PicoTestDriver v${SCRIPT_VERSION}")
 assert_contains "$version_output" "v${SCRIPT_VERSION}" "version should contain script version"
 
 echo

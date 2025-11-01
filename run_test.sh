@@ -226,7 +226,7 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         -v|--version)
-            echo "PICO-8 Test Framework Runner v${SCRIPT_VERSION}"
+            echo "PicoTestDriver v${SCRIPT_VERSION}"
             exit 0
             ;;
         -c|--cart)
@@ -298,7 +298,7 @@ if $LIST_SUBTESTS; then
 fi
 
 # Show configuration
-print_color $BLUE "=== PICO-8 Test Framework Runner v${SCRIPT_VERSION} ==="
+print_color $BLUE "=== PicoTestDriver v${SCRIPT_VERSION} ==="
 echo "Cartridge: $CART_FILE"
 echo "Subtest: $SUBTEST"
 echo "Timeout: ${TIMEOUT}s"

@@ -1,9 +1,20 @@
 # picotestdriver todo:
-  
+
+## docs
+- [x] rename PICO-8 TEST FRAMEWORK to PicoTestDriver in all files
+
+
+## fixes
+
+
 ## improvements
-- [x] improve the command line to add a test file generator
-  - [x] generate a test.p8 dummy card with the #include statements
-  - [x] generate a list of empty subtests (movement, collision, etc.)
-  - [x] set common test parameters (timeout, subtests, etc.)
-  - [x] init the subtest table
-- [x] include info about the test file generator in README.md
+
+- [x] rename run_test.sh to ptd (with magic bash comment to allow running without the .sh extension) and update references
+- [x] add a test subcommand (ptd.sh test) and use it to mimic the old run_test.sh function
+- [x] add a generate subcommand to mimic the generate_test.sh functionality
+- [ ] remove old generate_test.sh
+- [ ] remove old run_test.sh files
+- [ ] add more demo tests in the cart demo to showcase edge case tests
+
+
+## new features

@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# PICO-8 Test Framework - Shared Functions Library
-# This file contains functions shared across the test runner and test suite
+#!/bin/bash
+
+# PicoTestDriver - Shared Functions Library
+# This file contains shared functions used across the test framework
 # Source this file to avoid code duplication and desync issues
 
 # Configuration
@@ -72,7 +74,7 @@ parse_arguments() {
                 return 0
                 ;;
             -v|--version)
-                echo "PICO-8 Test Framework Runner v${SCRIPT_VERSION}"
+                echo "PicoTestDriver v${SCRIPT_VERSION}"
                 return 0
                 ;;
             -c|--cart)
@@ -140,7 +142,7 @@ show_configuration() {
     local timeout=$3
     local verbose=$4
 
-    print_color $BLUE "=== PICO-8 Test Framework Runner v${SCRIPT_VERSION} ==="
+    print_color $BLUE "=== PicoTestDriver v${SCRIPT_VERSION} ==="
     echo "Cartridge: $cart_file"
     echo "Phase: $phase"
     echo "Timeout: ${timeout}s"

@@ -81,7 +81,11 @@ show_configuration() {
     local timeout=$3
     local verbose=$4
 
-    print_color $BLUE "=== PICO-8 Test Framework Runner v${SCRIPT_VERSION} ==="
+    if [ -z "$phase" ]; then
+        phase="all"
+    fi
+
+    print_color $BLUE "=== PicoTestDriver v${SCRIPT_VERSION} ==="
     echo "Cartridge: $cart_file"
     echo "Phase: $phase"
     echo "Timeout: ${timeout}s"

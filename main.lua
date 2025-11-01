@@ -25,7 +25,7 @@ local subtests = {
 }
 
 function _init()
-  test_log("=== PICO-8 TEST FRAMEWORK DEMO ===", "info")
+  test_log("=== PICOTESTDRIVER DEMO ===", "info")
   
   -- Build subtest names list for test_init
   local subtest_names = {}
@@ -118,7 +118,7 @@ function _draw()
   local subtest_name = subtest and subtest.name or "COMPLETE"
   local subtest_frame = test_frame - subtest_start_frame
   
-  print("PICO-8 TEST FRAMEWORK", 2, 2, 7)
+  print("PICOTESTDRIVER DEMO", 2, 2, 7)
   print("TEST: " .. subtest_name, 2, 10, 7)
   print("FRAME: " .. subtest_frame, 2, 18, 7)
   print("(" .. current_subtest .. "/" .. #subtests .. ")", 60, 18, 6)
