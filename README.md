@@ -320,7 +320,9 @@ pico8-test-framework/
 │   └── copilot-instructions.md # AI assistant guidelines
 ├── docs/                       # Documentation
 │   ├── integration_guide.md    # Integration tutorial
-│   └── development_notes.md    # Implementation details
+│   ├── development_notes.md    # Implementation details
+│   ├── changelog_automation.md # Changelog generation guide
+│   └── ai_agent_workflow.md    # AI agent/CI workflow guide
 ├── test/                       # Test suite
 │   ├── test_runner.sh          # Test suite executor
 │   ├── test_helper.sh          # Test utilities
