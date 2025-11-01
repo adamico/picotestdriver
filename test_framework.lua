@@ -113,12 +113,14 @@ function test_update_frame()
 
     -- Check for timeout
     if test_framework.frame_count >= test_framework.options.timeout_frames then
-        local timeout_msg = "TIMEOUT: Test execution timed out after " .. test_framework.frame_count .. " frames"
+        local timeout_msg = "TIMEOUT: Test execution exceeded time limit"
         if test_framework.options.timeout_seconds then
             timeout_msg = timeout_msg .. " (" .. test_framework.options.timeout_seconds .. "s)"
+        else
+            timeout_msg = timeout_msg .. " (" .. test_framework.frame_count .. " frames)"
         end
         test_log(timeout_msg, "error")
-        test_complete("Test timed out")
+        stop("Test timed out - increase timeout if needed")
     end
 end
 

@@ -27,15 +27,42 @@ local subtests = {
 function _init()
   test_log("=== PICO-8 TEST FRAMEWORK DEMO ===", "info")
   
+  -- Build subtest names list for test_init
+  local subtest_names = {}
+  for i = 1, #subtests do
+    subtest_names[i] = subtests[i].name
+  end
+  
   test_init({
-    subtests = { "all" },
-    timeout_frames = 600,  -- 10 seconds total
+    subtests = subtest_names,
+    timeout_frames = 600,  -- 10 seconds default (overridden by command line)
     debug_level = "info",
   })
   
   init_game()
   test_frame = 0
+  
+  -- Find which subtest to start with based on command line
+  local requested_subtest = test_get_subtest()
   current_subtest = 1
+  
+  if requested_subtest ~= "default" and requested_subtest ~= "all" then
+    -- Find the requested subtest
+    local found = false
+    for i = 1, #subtests do
+      if subtests[i].name == requested_subtest then
+        current_subtest = i
+        found = true
+        break
+      end
+    end
+    
+    if not found then
+      test_log("Requested subtest '" .. requested_subtest .. "' not found, running all", "warn")
+      current_subtest = 1
+    end
+  end
+  
   subtest_start_frame = 0
   
   test_log("Starting subtest: " .. subtests[current_subtest].name, "info")
@@ -179,6 +206,16 @@ end
 
 -- Helper functions
 function next_subtest()
+  local requested_subtest = test_get_subtest()
+  
+  -- If running a specific subtest, stop after it completes
+  if requested_subtest ~= "default" and requested_subtest ~= "all" then
+    test_log("Subtest '" .. requested_subtest .. "' complete!", "info")
+    test_complete("Subtest complete")
+    return
+  end
+  
+  -- Otherwise, advance to next subtest
   current_subtest += 1
   subtest_start_frame = test_frame
   
@@ -187,7 +224,7 @@ function next_subtest()
     init_game()
   else
     test_log("All subtests complete!", "info")
-    test_complete()
+    test_complete("All subtests complete")
   end
 end
 
@@ -280,6 +317,6 @@ function test_boundary(frame)
   end
   
   if frame >= subtests[current_subtest].duration then
-    test_complete()
+    next_subtest()
   end
 end

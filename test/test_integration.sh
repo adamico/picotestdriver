@@ -30,16 +30,15 @@ assert_contains "$config_output" "45s" "config should show timeout"
 assert_contains "$config_output" "Verbose: enabled" "config should show verbose status"
 
 echo
-echo "Testing list phases output..."
+echo "Testing list subtests output..."
 
-# Test list phases output
-list_output=$(handle_list_phases "test_cart.p8")
-assert_contains "$list_output" "Available test phases in test_cart.p8" "list should show cartridge-specific phases"
+# Test list subtests output
+list_output=$(handle_list_subtests "test_cart.p8")
+assert_contains "$list_output" "Available test subtests in" "list should show cartridge-specific subtests"
 assert_contains "$list_output" "movement" "list should contain movement test"
 assert_contains "$list_output" "collision" "list should contain collision test"
 assert_contains "$list_output" "input" "list should contain input test"
 assert_contains "$list_output" "boundary" "list should contain boundary test"
-assert_contains "$list_output" "all" "list should contain all phases"
 
 echo
 echo "Testing command building with verbose output..."
