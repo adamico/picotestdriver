@@ -97,26 +97,10 @@ assert_not_contains() {
     fi
 }
 
-# Create a test changelog
+# Create a test changelog (new format without [Unreleased])
 create_test_changelog() {
     cat > "$TEST_CHANGELOG" << 'EOF'
 # Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Features
-- None yet
-
-### Bug Fixes
-- None yet
-
-### Performance Improvements
-- None yet
 
 ## [1.0.0] - 2025-10-31
 
@@ -126,8 +110,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 **About this project:** Test project
-**Format:** Keep a Changelog
-**Automation:** Run script
+EOF
+}
+
+# Create changelog with existing unreleased content
+create_test_changelog_with_content() {
+    cat > "$TEST_CHANGELOG" << 'EOF'
+# Changelog
+
+### Features
+- Existing feature
+
+## [1.0.0] - 2025-10-31
+
+### Features
+- Initial release
+
+---
+
+**About this project:** Test project
+EOF
+}
+
+# Create completely empty changelog (just header)
+create_empty_changelog() {
+    cat > "$TEST_CHANGELOG" << 'EOF'
+# Changelog
+
+---
+
+**About this project:** Test project
+EOF
+}
+
+# Create changelog with old [Unreleased] format (backwards compat test)
+create_old_format_changelog() {
+    cat > "$TEST_CHANGELOG" << 'EOF'
+# Changelog
+
+## [Unreleased]
+
+### Features
+- Old format feature
+
+## [1.0.0] - 2025-10-31
+
+### Features
+- Initial release
 EOF
 }
 

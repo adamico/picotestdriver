@@ -412,8 +412,7 @@ release_version() {
         
         # Extract content between header and first version (or between [Unreleased] and first version for backwards compat)
         sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | \
-            sed '1,/^# Changelog/d' | \
-            sed '/^## \[[0-9]/d' | \
+            sed '1d;$d' | \
             sed '/^## \[Unreleased\]/d'
         
         echo ""
