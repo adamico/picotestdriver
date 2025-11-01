@@ -48,9 +48,17 @@ cd picotestdriver
 
 # List available test subtests
 ./ptd test -d --list
+# Available subtests:
+#   - movement:    Player movement tests
+#   - collision:   Collision detection tests
+#   - input:       Input handling tests
+#   - boundary:    Boundary clamping tests
+#   - assertions:  Various assertion patterns
+#   - timing:      Frame-dependent behavior tests
+#   - edge_cases:  Boundary conditions and corner cases
 
 # Run a specific subtest
-./ptd test -d movement
+./ptd test -d assertions
 ```
 
 ### 3. Generate Your Test Files

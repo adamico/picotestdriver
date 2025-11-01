@@ -22,6 +22,9 @@ local subtests = {
   { name = "collision", duration = 120 },
   { name = "input", duration = 120 },
   { name = "boundary", duration = 120 },
+  { name = "assertions", duration = 120 },
+  { name = "timing", duration = 180 },
+  { name = "edge_cases", duration = 120 },
 }
 
 function _init()
@@ -89,6 +92,12 @@ function _update60()
     test_input(subtest_frame)
   elseif subtest.name == "boundary" then
     test_boundary(subtest_frame)
+  elseif subtest.name == "assertions" then
+    test_assertions(subtest_frame)
+  elseif subtest.name == "timing" then
+    test_timing(subtest_frame)
+  elseif subtest.name == "edge_cases" then
+    test_edge_cases(subtest_frame)
   end
   
   -- Update game (if needed for tests)
@@ -313,6 +322,186 @@ function test_boundary(frame)
       test_log("✓ BOUNDARY: Right boundary clamping works", "info")
     else
       test_log("✗ BOUNDARY: Player exceeded right boundary", "error")
+    end
+  end
+  
+  if frame == 60 then
+    -- Test left boundary
+    player.x = 6
+    player.dx = -2
+    update_player()
+    
+    if player.x >= 4 then
+      test_log("✓ BOUNDARY: Left boundary clamping works", "info")
+    else
+      test_log("✗ BOUNDARY: Player exceeded left boundary", "error")
+    end
+  end
+  
+  if frame >= subtests[current_subtest].duration then
+    next_subtest()
+  end
+end
+
+function test_assertions(frame)
+  if frame == 1 then
+    test_log("=== ASSERTION TEST ===", "info")
+    test_log("Demonstrating various assertion patterns", "info")
+    init_game()
+  end
+  
+  if frame == 10 then
+    -- Test equality assertions
+    local expected_x = 64
+    local actual_x = player.x
+    if actual_x == expected_x then
+      test_log("✓ ASSERTION: Player X position equals " .. expected_x, "info")
+    else
+      test_log("✗ ASSERTION: Expected X=" .. expected_x .. ", got X=" .. actual_x, "error")
+    end
+  end
+  
+  if frame == 30 then
+    -- Test range assertions
+    local min_speed = 0
+    local max_speed = 2
+    if player.speed >= min_speed and player.speed <= max_speed then
+      test_log("✓ ASSERTION: Player speed in valid range [" .. min_speed .. "," .. max_speed .. "]", "info")
+    else
+      test_log("✗ ASSERTION: Player speed " .. player.speed .. " outside valid range", "error")
+    end
+  end
+  
+  if frame == 50 then
+    -- Test collection assertions
+    local enemy_count = #enemies
+    if enemy_count == 0 then
+      test_log("✓ ASSERTION: Enemy count is zero (as expected)", "info")
+    else
+      test_log("✗ ASSERTION: Expected 0 enemies, found " .. enemy_count, "error")
+    end
+  end
+  
+  if frame == 70 then
+    -- Test type assertions
+    if type(player.x) == "number" then
+      test_log("✓ ASSERTION: Player X is number type", "info")
+    else
+      test_log("✗ ASSERTION: Player X has wrong type: " .. type(player.x), "error")
+    end
+  end
+  
+  if frame >= subtests[current_subtest].duration then
+    next_subtest()
+  end
+end
+
+function test_timing(frame)
+  if frame == 1 then
+    test_log("=== TIMING TEST ===", "info")
+    test_log("Testing frame-dependent behavior", "info")
+    init_game()
+    -- Mark test start time
+    player.color = 7
+  end
+  
+  if frame == 60 then
+    -- Test at 1 second mark (60 frames @ 60fps)
+    test_log("✓ TIMING: Reached 1 second mark (frame 60)", "info")
+  end
+  
+  if frame == 120 then
+    -- Test at 2 second mark
+    test_log("✓ TIMING: Reached 2 second mark (frame 120)", "info")
+    
+    -- Simulate adding an enemy after delay
+    add(enemies, { x = 100, y = 100, color = 8 })
+  end
+  
+  if frame == 140 then
+    -- Verify enemy was added in previous frame
+    if #enemies > 0 then
+      test_log("✓ TIMING: Enemy spawned after delay", "info")
+    else
+      test_log("✗ TIMING: Enemy spawn failed", "error")
+    end
+  end
+  
+  if frame >= subtests[current_subtest].duration then
+    next_subtest()
+  end
+end
+
+function test_edge_cases(frame)
+  if frame == 1 then
+    test_log("=== EDGE CASE TEST ===", "info")
+    test_log("Testing boundary conditions and corner cases", "info")
+    init_game()
+  end
+  
+  if frame == 10 then
+    -- Test zero movement
+    player.dx = 0
+    player.dy = 0
+    local start_x = player.x
+    update_player()
+    
+    if player.x == start_x then
+      test_log("✓ EDGE CASE: Zero movement handled correctly", "info")
+    else
+      test_log("✗ EDGE CASE: Player moved with zero velocity", "error")
+    end
+  end
+  
+  if frame == 30 then
+    -- Test negative coordinates (should be clamped)
+    player.x = -10
+    player.y = -10
+    update_player()
+    
+    if player.x >= 4 and player.y >= 4 then
+      test_log("✓ EDGE CASE: Negative coordinates clamped to minimum", "info")
+    else
+      test_log("✗ EDGE CASE: Negative coordinates not handled", "error")
+    end
+  end
+  
+  if frame == 50 then
+    -- Test maximum coordinates (should be clamped)
+    player.x = 200
+    player.y = 200
+    update_player()
+    
+    if player.x <= 123 and player.y <= 123 then
+      test_log("✓ EDGE CASE: Excessive coordinates clamped to maximum", "info")
+    else
+      test_log("✗ EDGE CASE: Excessive coordinates not handled", "error")
+    end
+  end
+  
+  if frame == 70 then
+    -- Test empty collections
+    enemies = {}
+    local collision = check_collisions()
+    
+    if not collision then
+      test_log("✓ EDGE CASE: No collision with empty enemy list", "info")
+    else
+      test_log("✗ EDGE CASE: False collision with empty list", "error")
+    end
+  end
+  
+  if frame == 90 then
+    -- Test exact boundary collision (on the edge)
+    player.x = 64
+    player.y = 64
+    add(enemies, { x = 72, y = 64, color = 8 })  -- exactly 8 pixels away
+    local collision = check_collisions()
+    
+    if collision then
+      test_log("✓ EDGE CASE: Collision detected at exact boundary distance", "info")
+    else
+      test_log("⚠ EDGE CASE: No collision at boundary (< 8 required)", "warn")
     end
   end
   
