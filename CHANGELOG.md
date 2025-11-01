@@ -16,11 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Performance Improvements
 - None yet
 
-## [1.1.0] - 2025-11-01
+## [1.1.2] - 2025-11-01
 
 
 ### Features
-- None yet
+- add --release flag to automate version releases
 
 ### Bug Fixes
 - None yet
@@ -71,6 +71,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created `lib/README.md` - Shared library documentation
 - Updated README with architecture section and changelog management
 - Added prepare-commit-msg hook for changelog prompts
+
+## [1.0.1] - 2025-11-01
+
+### Features
+- Development environment setup with git hooks for conventional commits
+- Automated commit message validation
+- Git hooks installation script
+
+### Documentation
+- Enhanced documentation with development workflow guide
+- Added contribution guidelines
+
+## [1.0.0] - 2025-11-01
+
+### Features
+- Initial release of PICO-8 Automated Testing Framework
+- Core test execution with `run_test.sh` script
+- Testable architecture with `run_test_testable.sh`
+- Test helper utilities for PICO-8
+- Support for custom timeout values
+- Phase-based test execution
+- Exit code propagation from PICO-8 to shell
+- Comprehensive README documentation
+
+### Documentation
+- Complete usage guide and examples
+- Architecture documentation
+- Development setup instructions
 
 ---
 

@@ -348,7 +348,8 @@ release_version() {
         echo ""
         
         # Append all existing version sections
-        sed -n '/^## \[[0-9]/,/^---/p' "$CHANGELOG_FILE" | sed '/^---/d'
+        # Extract everything from the first version section to the footer
+        awk '/^## \[[0-9]/ {found=1} found && /^---/ {exit} found {print}' "$CHANGELOG_FILE"
         
         # Append footer
         sed -n '/^---/,$p' "$CHANGELOG_FILE"
