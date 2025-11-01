@@ -226,6 +226,82 @@ Be mindful of PICO-8's 8192 token limit:
 - **Conditional builds**: Use `--if` flags for test vs production builds
 - **Command-line automation**: `run_test.sh` integrates with CI/CD pipelines
 
+## Version Management & Release Process
+
+### Semantic Versioning (SemVer)
+This project follows [Semantic Versioning 2.0.0](https://semver.org/) strictly from v1.2.0 onwards:
+
+**Version Format**: `MAJOR.MINOR.PATCH`
+
+- **MAJOR (X.0.0)**: Breaking changes
+  - Changes that break backwards compatibility
+  - Commit types: `feat!:`, `fix!:`, or commits with `BREAKING CHANGE:` footer
+  - Example: Removing public API, changing CLI arguments, incompatible config changes
+
+- **MINOR (1.X.0)**: New features (backwards compatible)
+  - New functionality that doesn't break existing code
+  - Commit type: `feat:`
+  - Example: New test assertion, additional CLI option, new framework feature
+
+- **PATCH (1.2.X)**: Bug fixes and minor changes
+  - Bug fixes, documentation, tests, refactoring, chores
+  - Commit types: `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `perf:`
+  - Example: Fix assertion logic, update README, optimize performance
+
+### Release Workflow for AI Agents
+
+When preparing a release:
+
+1. **Review commits since last tag**: Check commit types to determine version bump
+   ```bash
+   git log $(git describe --tags --abbrev=0)..HEAD --oneline
+   ```
+
+2. **Determine new version**:
+   - Any `feat!:`, `fix!:`, or `BREAKING CHANGE:`? → Bump MAJOR
+   - Any `feat:`? → Bump MINOR
+   - Only `fix:`, `docs:`, `test:`, etc.? → Bump PATCH
+
+3. **Generate and release changelog**:
+   ```bash
+   ./scripts/generate_changelog.sh --auto-accept           # Add unreleased changes
+   ./scripts/generate_changelog.sh --release X.Y.Z -y     # Create version section
+   git add CHANGELOG.md && git commit -m "chore: release version X.Y.Z"
+   git tag -a vX.Y.Z -m "Release vX.Y.Z: Brief description"
+   ```
+
+4. **Verify before pushing**:
+   ```bash
+   ./scripts/test_changelog_new_format.sh  # Run tests
+   git log --oneline --decorate -5         # Verify commit and tag
+   ```
+
+### Conventional Commits
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Common types**:
+- `feat`: New feature (→ MINOR bump)
+- `fix`: Bug fix (→ PATCH bump)
+- `docs`: Documentation only
+- `test`: Adding or updating tests
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `perf`: Performance improvement
+- `chore`: Maintenance tasks, dependency updates
+- `ci`: CI/CD configuration changes
+
+**Breaking changes**: Add `!` after type or include `BREAKING CHANGE:` footer (→ MAJOR bump)
+
+### Historical Context
+Versions v1.0.0 through v1.1.3 predate strict semver enforcement and used PATCH bumps for features. Starting from v1.2.0, proper semantic versioning is enforced. Past versions are considered water under the bridge.
+
 ---
 
 *Update this file if you add new major systems, workflows, or conventions.*
