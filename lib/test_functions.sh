@@ -61,6 +61,9 @@ parse_arguments() {
     local verbose=false
     local list_phases=false
     local cart_file="test_cart.p8"
+    
+    # Get script directory for demo mode
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
     while [[ ${#args[@]} -gt 0 ]]; do
         case ${args[0]} in
@@ -75,6 +78,10 @@ parse_arguments() {
             -c|--cart)
                 cart_file="${args[1]}"
                 args=("${args[@]:2}")
+                ;;
+            -d|--demo)
+                cart_file="$script_dir/test_cart.p8"
+                args=("${args[@]:1}")
                 ;;
             -l|--list)
                 list_phases=true
