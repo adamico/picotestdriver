@@ -145,19 +145,57 @@ update_changelog() {
     # Backup existing changelog
     if [ -f "$CHANGELOG_FILE" ]; then
         cp "$CHANGELOG_FILE" "$CHANGELOG_BACKUP"
-        print_color "$GREEN" "Created backup: $CHANGELOG_BACKUP"
+        print_color "$GREEN" "Created backup: $CHANGELOG_BACKUP" >&2
     fi
     
-    # Read generated changelog
-    local generated_content=$(cat "$generated_file")
+    # Read generated content (should be a new [Unreleased] section)
+    local new_features=$(sed -n '/### Features/,/^$/p' "$generated_file" | grep -v "^### Features" | grep -v "^$" || true)
+    local new_fixes=$(sed -n '/### Bug Fixes/,/^$/p' "$generated_file" | grep -v "^### Bug Fixes" | grep -v "^$" || true)
+    local new_perf=$(sed -n '/### Performance Improvements/,/^$/p' "$generated_file" | grep -v "^### Performance Improvements" | grep -v "^$" || true)
     
-    # Extract [Unreleased] section from current changelog
-    local unreleased_section=""
-    if [ -f "$CHANGELOG_FILE" ]; then
-        unreleased_section=$(sed -n '/## \[Unreleased\]/,/## \[/p' "$CHANGELOG_FILE" | sed '$d')
+    # Extract existing [Unreleased] content from current changelog
+    local existing_features=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Features/,/^### /p' | grep "^- " || true)
+    local existing_fixes=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Bug Fixes/,/^### /p' | grep "^- " || true)
+    local existing_perf=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | sed -n '/### Performance Improvements/,/^### /p' | grep "^- " || true)
+    
+    # Merge: Keep existing non-placeholder entries, add new ones
+    local merged_features=""
+    if [ -n "$existing_features" ] && ! echo "$existing_features" | grep -q "None yet"; then
+        merged_features="$existing_features"
+    fi
+    if [ -n "$new_features" ]; then
+        if [ -n "$merged_features" ]; then
+            merged_features="$merged_features"$'\n'"$new_features"
+        else
+            merged_features="$new_features"
+        fi
     fi
     
-    # Create new changelog with generated content
+    local merged_fixes=""
+    if [ -n "$existing_fixes" ] && ! echo "$existing_fixes" | grep -q "None yet"; then
+        merged_fixes="$existing_fixes"
+    fi
+    if [ -n "$new_fixes" ]; then
+        if [ -n "$merged_fixes" ]; then
+            merged_fixes="$merged_fixes"$'\n'"$new_fixes"
+        else
+            merged_fixes="$new_fixes"
+        fi
+    fi
+    
+    local merged_perf=""
+    if [ -n "$existing_perf" ] && ! echo "$existing_perf" | grep -q "None yet"; then
+        merged_perf="$existing_perf"
+    fi
+    if [ -n "$new_perf" ]; then
+        if [ -n "$merged_perf" ]; then
+            merged_perf="$merged_perf"$'\n'"$new_perf"
+        else
+            merged_perf="$new_perf"
+        fi
+    fi
+    
+    # Create new changelog with merged [Unreleased]
     {
         echo "# Changelog"
         echo ""
@@ -166,13 +204,35 @@ update_changelog() {
         echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),"
         echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
         echo ""
-        
-        if [ -n "$unreleased_section" ]; then
-            echo "$unreleased_section"
-            echo ""
+        echo "## [Unreleased]"
+        echo ""
+        echo "### Features"
+        if [ -n "$merged_features" ]; then
+            echo "$merged_features"
+        else
+            echo "- None yet"
         fi
+        echo ""
+        echo "### Bug Fixes"
+        if [ -n "$merged_fixes" ]; then
+            echo "$merged_fixes"
+        else
+            echo "- None yet"
+        fi
+        echo ""
+        echo "### Performance Improvements"
+        if [ -n "$merged_perf" ]; then
+            echo "$merged_perf"
+        else
+            echo "- None yet"
+        fi
+        echo ""
         
-        echo "$generated_content"
+        # Append all version sections (everything between first [Unreleased] and Project Context)
+        if [ -f "$CHANGELOG_FILE" ]; then
+            # Find all content after the first [Unreleased] section ends, before Project Context
+            sed -n '/^## \[[0-9]/,/^## Project Context/p' "$CHANGELOG_FILE" | sed '/^## Project Context/d'
+        fi
         
         # Append project context and footer from original
         if [ -f "$CHANGELOG_FILE" ]; then
@@ -181,7 +241,7 @@ update_changelog() {
     } > "$CHANGELOG_FILE.new"
     
     mv "$CHANGELOG_FILE.new" "$CHANGELOG_FILE"
-    print_color "$GREEN" "Updated $CHANGELOG_FILE"
+    print_color "$GREEN" "Updated $CHANGELOG_FILE" >&2
 }
 
 # Interactive mode
