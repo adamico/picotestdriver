@@ -1,5 +1,59 @@
 # Changelog
 
+## [3.0.1] - 2025-11-01
+
+### Fixed
+- fix: improve input simulation utilities with test coverage
+
+### Documentation
+- docs: update documentation for new button state functions
+
+## [3.0.0] - 2025-11-01
+
+### Added
+- feat: add color formatting to all help text and command output
+- feat: add comprehensive edge case tests to demo cartridge
+- feat: add color formatting to all help text and command output
+- feat: add comprehensive edge case tests to demo cartridge
+
+### Fixed
+- fix: improve input simulation utilities with test coverage
+- fix: improve test utilities and documentation
+
+### Changed
+- refactor: extract changelog automation to standalone library (git-changelog-automation)
+- refactor: improve changelog format with categorized sections
+- refactor: remove bundled changelog scripts (now in git-changelog-automation)
+- refactor: remove changelog automation files (extracted to standalone library)
+- refactor: improve changelog format with categorized sections
+
+### Performance
+- None yet
+- None yet
+
+### Documentation
+- Added contribution guidelines
+- Added prepare-commit-msg hook for changelog prompts
+- Architecture documentation
+- Complete usage guide and examples
+- Created `docs/ai_agent_workflow.md` - AI agent/CI workflow guide
+- Created `docs/changelog_automation.md` - Complete changelog automation guide
+- Created `lib/README.md` - Shared library documentation
+- Created `scripts/README.md` documenting all scripts and testing workflow
+- Development setup instructions
+- docs: add reference to git-changelog-automation for changelog generation
+- docs: create docs/changelog-automation.md with migration guide
+- docs: document extraction of changelog automation to standalone library
+- docs: update documentation for new button state functions
+- docs: update todo.md with completed improvements
+- Enhanced documentation with development workflow guide
+- Updated README with architecture section and changelog management
+- Updated roadmap in `docs/development_notes.md`
+
+### Chores
+- chore: bump version to 3.0.1
+
+
 ## [3.0.0] - 2025-11-01
 
 
