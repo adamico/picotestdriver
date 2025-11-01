@@ -1,6 +1,6 @@
 # PICO-8 Automated Testing Framework
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/your-repo/pico8-test-framework)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/your-repo/pico8-test-framework)
 [![PICO-8](https://img.shields.io/badge/PICO--8-0.2.5+-red.svg)](https://www.lexaloffle.com/pico-8.php)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 

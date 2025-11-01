@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0] - 2025-11-01
+
+
+### Features
+- add VERSION file as single source of truth
+- auto-update README version badge during release
+
+
 ## [1.2.0] - 2025-11-01
 
 
