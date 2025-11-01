@@ -302,6 +302,68 @@ All commits must follow [Conventional Commits](https://www.conventionalcommits.o
 ### Historical Context
 Versions v1.0.0 through v1.1.3 predate strict semver enforcement and used PATCH bumps for features. Starting from v1.2.0, proper semantic versioning is enforced. Past versions are considered water under the bridge.
 
+## Terminal Command Patterns (CRITICAL)
+
+When working with GitHub Copilot in VS Code, follow these patterns for auto-approvable commands:
+
+### ✅ AUTO-APPROVABLE PATTERNS (BEST TO WORST)
+
+**Pattern 1: Check Cwd, then run simple commands (BEST)**
+```bash
+# The terminal maintains a persistent working directory (Cwd)
+# Check context: Cwd: /home/user/project
+
+# If already in the right directory, just run the command:
+git status
+ls -la
+git commit -m "message"
+
+# If not in the right directory, change once:
+cd /target/dir
+
+# Then run simple commands (all auto-approved):
+git status
+ls -la
+```
+
+**Pattern 2: Subshell for one-off operations (GOOD)**
+```bash
+# Single operation in different directory without changing terminal state
+(cd /target/dir && command1 && command2)
+
+# Example:
+(cd ~/game_dev/obsi/lib/picotestdriver && git status && wc -l CHANGELOG.md)
+(cd ~/game_dev/obsi/lib/picotestdriver && changelog --rebuild)
+```
+
+### ❌ CANNOT AUTO-APPROVE
+
+**Avoid these patterns:**
+```bash
+# This CANNOT be auto-approved by Copilot
+cd /path && command
+
+# This CANNOT be auto-approved
+cd /path && command1 && command2
+```
+
+### Why This Matters
+- Commands starting with `cd /path &&` cannot be auto-approved in VS Code
+- Simple commands ARE auto-approved when terminal is already in the right directory
+- Check the `Cwd` in context before running commands
+- Use `cd` once to change directory, then run multiple simple commands
+- Subshells `(cd ... && ...)` work for one-off operations but don't persist directory changes
+
+### Best Practice Workflow
+1. **Check context**: Look at `Cwd: /current/path` in the context
+2. **If in right directory**: Run simple commands directly (auto-approved)
+3. **If wrong directory**: Run `cd /target/path` once
+4. **Then**: All subsequent simple commands are auto-approved
+5. **For one-off**: Use subshell `(cd /path && command)` if you don't want to change terminal state
+
+### Enforcement
+**ALWAYS check Cwd first**. If terminal is already in the right directory, just run simple commands. Never use `cd /path && command` as a single command string.
+
 ---
 
 *Update this file if you add new major systems, workflows, or conventions.*
