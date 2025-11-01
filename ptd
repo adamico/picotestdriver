@@ -39,38 +39,36 @@ print_color() {
 
 # Show main help
 show_main_help() {
-    cat << EOF
-PicoTestDriver v${PTD_VERSION}
-PICO-8 Automated Testing Framework
-
-USAGE:
-    ptd <command> [options]
-
-COMMANDS:
-    test        Run PICO-8 test cartridges with automated testing
-    generate    Generate test files for your project
-    help        Show help for a specific command
-    version     Show version information
-
-EXAMPLES:
-    ptd test -d
-        Run the demo test cartridge
-
-    ptd test -c my_test.p8
-        Run tests from your cartridge
-
-    ptd generate -d tests -n my_game
-        Generate test files in tests/ directory
-
-    ptd help test
-        Show detailed help for the test command
-
-Get started:
-    ptd generate -d tests -n my_game    # Create test files
-    ptd test -c tests/my_game.p8        # Run your tests
-
-For more information: https://github.com/adamico/picotestdriver
-EOF
+    print_color $BLUE "PicoTestDriver v${PTD_VERSION}"
+    print_color $NC "PICO-8 Automated Testing Framework"
+    echo ""
+    print_color $YELLOW "USAGE:"
+    print_color $NC "    ptd <command> [options]"
+    echo ""
+    print_color $YELLOW "COMMANDS:"
+    print_color $GREEN "    test        ${NC}Run PICO-8 test cartridges with automated testing"
+    print_color $GREEN "    generate    ${NC}Generate test files for your project"
+    print_color $GREEN "    help        ${NC}Show help for a specific command"
+    print_color $GREEN "    version     ${NC}Show version information"
+    echo ""
+    print_color $YELLOW "EXAMPLES:"
+    print_color $GREEN "    ptd test -d"
+    print_color $NC "        Run the demo test cartridge"
+    echo ""
+    print_color $GREEN "    ptd test -c my_test.p8"
+    print_color $NC "        Run tests from your cartridge"
+    echo ""
+    print_color $GREEN "    ptd generate -d tests -n my_game"
+    print_color $NC "        Generate test files in tests/ directory"
+    echo ""
+    print_color $GREEN "    ptd help test"
+    print_color $NC "        Show detailed help for the test command"
+    echo ""
+    print_color $YELLOW "Get started:"
+    print_color $GREEN "    ptd generate -d tests -n my_game    ${NC}# Create test files"
+    print_color $GREEN "    ptd test -c tests/my_game.p8        ${NC}# Run your tests"
+    echo ""
+    print_color $BLUE "For more information: https://github.com/adamico/picotestdriver"
 }
 
 # TEST SUBCOMMAND
@@ -86,49 +84,47 @@ cmd_test() {
 
     # Show test help
     show_test_help() {
-        cat << EOF
-PicoTestDriver v${PTD_VERSION} - Test Runner
-
-Run PICO-8 cartridges with automated testing capabilities.
-
-USAGE:
-    ptd test [OPTIONS] [SUBTEST] [TIMEOUT]
-
-ARGUMENTS:
-    SUBTEST     Test subtest to run (default: all)
-    TIMEOUT     Maximum runtime in seconds (default: ${DEFAULT_TIMEOUT})
-
-OPTIONS:
-    -h, --help      Show this help message
-    -c, --cart      Specify the test cartridge file
-    -d, --demo      Run the demo test cartridge
-    -l, --list      List available test subtests
-    -v, --version   Show version information
-    --verbose       Enable verbose output
-
-EXAMPLES:
-    ptd test -d
-        Run the demo test cartridge
-
-    ptd test -c my_test.p8
-        Run all tests in my_test.p8
-
-    ptd test -c my_test.p8 movement
-        Run only the movement subtest
-
-    ptd test -c my_test.p8 collision 60
-        Run collision tests with 60 second timeout
-
-    ptd test -c my_test.p8 --list
-        List all available test subtests
-
-EXIT CODES:
-    0   Success
-    1   Invalid arguments
-    2   PICO-8 not found
-    3   Test cartridge not found
-    124 Timeout reached
-EOF
+        print_color $BLUE "PicoTestDriver v${PTD_VERSION} - Test Runner"
+        echo ""
+        print_color $NC "Run PICO-8 cartridges with automated testing capabilities."
+        echo ""
+        print_color $YELLOW "USAGE:"
+        print_color $NC "    ptd test [OPTIONS] [SUBTEST] [TIMEOUT]"
+        echo ""
+        print_color $YELLOW "ARGUMENTS:"
+        print_color $NC "    SUBTEST     Test subtest to run (default: all)"
+        print_color $NC "    TIMEOUT     Maximum runtime in seconds (default: ${DEFAULT_TIMEOUT})"
+        echo ""
+        print_color $YELLOW "OPTIONS:"
+        print_color $GREEN "    -h, --help      ${NC}Show this help message"
+        print_color $GREEN "    -c, --cart      ${NC}Specify the test cartridge file"
+        print_color $GREEN "    -d, --demo      ${NC}Run the demo test cartridge"
+        print_color $GREEN "    -l, --list      ${NC}List available test subtests"
+        print_color $GREEN "    -v, --version   ${NC}Show version information"
+        print_color $GREEN "    --verbose       ${NC}Enable verbose output"
+        echo ""
+        print_color $YELLOW "EXAMPLES:"
+        print_color $GREEN "    ptd test -d"
+        print_color $NC "        Run the demo test cartridge"
+        echo ""
+        print_color $GREEN "    ptd test -c my_test.p8"
+        print_color $NC "        Run all tests in my_test.p8"
+        echo ""
+        print_color $GREEN "    ptd test -c my_test.p8 movement"
+        print_color $NC "        Run only the movement subtest"
+        echo ""
+        print_color $GREEN "    ptd test -c my_test.p8 collision 60"
+        print_color $NC "        Run collision tests with 60 second timeout"
+        echo ""
+        print_color $GREEN "    ptd test -c my_test.p8 --list"
+        print_color $NC "        List all available test subtests"
+        echo ""
+        print_color $YELLOW "EXIT CODES:"
+        print_color $NC "    0   Success"
+        print_color $NC "    1   Invalid arguments"
+        print_color $NC "    2   PICO-8 not found"
+        print_color $NC "    3   Test cartridge not found"
+        print_color $NC "    124 Timeout reached"
     }
 
     # Check if PICO-8 is available
@@ -209,12 +205,12 @@ EOF
             unique_subtests=$(echo "$all_subtests" | sort | uniq)
             while IFS= read -r subtest; do
                 if [ -n "$subtest" ]; then
-                    echo "  $subtest"
+                    print_color $GREEN "  $subtest"
                 fi
             done <<< "$unique_subtests"
         else
             print_color $YELLOW "No subtests found. Make sure your test file includes:"
-            echo '  local subtests = { { name = "test_name", ... }, ... }'
+            print_color $NC '  local subtests = { { name = "test_name", ... }, ... }'
         fi
 
         echo ""
@@ -300,11 +296,11 @@ EOF
 
     # Show configuration
     print_color $BLUE "=== PicoTestDriver v${PTD_VERSION} ==="
-    echo "Cartridge: $CART_FILE"
-    echo "Subtest: $SUBTEST"
-    echo "Timeout: ${TIMEOUT}s"
+    print_color $NC "Cartridge: $CART_FILE"
+    print_color $NC "Subtest: $SUBTEST"
+    print_color $NC "Timeout: ${TIMEOUT}s"
     if $VERBOSE; then
-        echo "Verbose: enabled"
+        print_color $NC "Verbose: enabled"
     fi
     echo ""
 
@@ -323,7 +319,7 @@ EOF
 
     # Run the test
     print_color $GREEN "Starting test execution..."
-    echo "Press Ctrl+C to abort"
+    print_color $YELLOW "Press Ctrl+C to abort"
     echo ""
 
     timeout "$TIMEOUT" $CMD
@@ -352,41 +348,39 @@ cmd_generate() {
     local FRAMEWORK_PATH="../lib/picotestdriver/test_framework.lua"
 
     show_generate_help() {
-        cat << EOF
-PicoTestDriver v${PTD_VERSION} - Test Generator
-
-Generate test cartridge and test files with boilerplate code.
-
-USAGE:
-    ptd generate [OPTIONS]
-
-OPTIONS:
-    -h, --help              Show this help message
-    -d, --dir DIR           Output directory (default: current directory)
-    -n, --name NAME         Test file base name (default: test)
-    -s, --subtests LIST     Comma-separated list of subtest names
-                           (default: movement,collision,input,boundary)
-    -t, --timeout SECONDS   Default timeout in seconds (default: 30)
-    --framework-path PATH   Path to test_framework.lua
-                           (default: ../lib/picotestdriver/test_framework.lua)
-
-EXAMPLES:
-    ptd generate
-        Generate test files in current directory with defaults
-
-    ptd generate -d tests -n my_test
-        Generate my_test.p8 and my_test.lua in tests/ directory
-
-    ptd generate -s "player,enemy,bullet" -t 60
-        Generate test files with custom subtests and 60s timeout
-
-    ptd generate --framework-path ./test_framework.lua
-        Use custom path to test framework
-
-GENERATED FILES:
-    {name}.p8       - PICO-8 cartridge with #include statements
-    {name}.lua      - Test implementation with subtest boilerplate
-EOF
+        print_color $BLUE "PicoTestDriver v${PTD_VERSION} - Test Generator"
+        echo ""
+        print_color $NC "Generate test cartridge and test files with boilerplate code."
+        echo ""
+        print_color $YELLOW "USAGE:"
+        print_color $NC "    ptd generate [OPTIONS]"
+        echo ""
+        print_color $YELLOW "OPTIONS:"
+        print_color $GREEN "    -h, --help              ${NC}Show this help message"
+        print_color $GREEN "    -d, --dir DIR           ${NC}Output directory (default: current directory)"
+        print_color $GREEN "    -n, --name NAME         ${NC}Test file base name (default: test)"
+        print_color $GREEN "    -s, --subtests LIST     ${NC}Comma-separated list of subtest names"
+        print_color $NC "                            (default: movement,collision,input,boundary)"
+        print_color $GREEN "    -t, --timeout SECONDS   ${NC}Default timeout in seconds (default: 30)"
+        print_color $GREEN "    --framework-path PATH   ${NC}Path to test_framework.lua"
+        print_color $NC "                            (default: ../lib/picotestdriver/test_framework.lua)"
+        echo ""
+        print_color $YELLOW "EXAMPLES:"
+        print_color $GREEN "    ptd generate"
+        print_color $NC "        Generate test files in current directory with defaults"
+        echo ""
+        print_color $GREEN "    ptd generate -d tests -n my_test"
+        print_color $NC "        Generate my_test.p8 and my_test.lua in tests/ directory"
+        echo ""
+        print_color $GREEN "    ptd generate -s \"player,enemy,bullet\" -t 60"
+        print_color $NC "        Generate test files with custom subtests and 60s timeout"
+        echo ""
+        print_color $GREEN "    ptd generate --framework-path ./test_framework.lua"
+        print_color $NC "        Use custom path to test framework"
+        echo ""
+        print_color $YELLOW "GENERATED FILES:"
+        print_color $NC "    {name}.p8       - PICO-8 cartridge with #include statements"
+        print_color $NC "    {name}.lua      - Test implementation with subtest boilerplate"
     }
 
     # Parse arguments
@@ -438,11 +432,11 @@ EOF
     local LUA_FILE="$OUTPUT_DIR/${TEST_NAME}.lua"
 
     print_color $BLUE "=== PicoTestDriver Test Generator ==="
-    echo "Output directory: $OUTPUT_DIR"
-    echo "Test name: $TEST_NAME"
-    echo "Subtests: $SUBTESTS"
-    echo "Timeout: ${TIMEOUT}s"
-    echo "Framework path: $FRAMEWORK_PATH"
+    print_color $NC "Output directory: $OUTPUT_DIR"
+    print_color $NC "Test name: $TEST_NAME"
+    print_color $NC "Subtests: $SUBTESTS"
+    print_color $NC "Timeout: ${TIMEOUT}s"
+    print_color $NC "Framework path: $FRAMEWORK_PATH"
     echo ""
 
     # Check if files exist
@@ -649,11 +643,11 @@ EOF
     echo ""
     print_color $BLUE "=== Generation Complete! ==="
     echo ""
-    echo "Next steps:"
-    echo "  1. Edit $LUA_FILE to implement your tests"
-    echo "  2. Run tests with: ptd test -c $P8_FILE"
-    echo "  3. Run specific subtest: ptd test -c $P8_FILE <subtest_name>"
-    echo "  4. List subtests: ptd test -c $P8_FILE --list"
+    print_color $NC "Next steps:"
+    print_color $NC "  1. Edit $LUA_FILE to implement your tests"
+    print_color $GREEN "  2. Run tests with: ptd test -c $P8_FILE"
+    print_color $GREEN "  3. Run specific subtest: ptd test -c $P8_FILE <subtest_name>"
+    print_color $GREEN "  4. List subtests: ptd test -c $P8_FILE --list"
     echo ""
     print_color $GREEN "Happy testing!"
 }
