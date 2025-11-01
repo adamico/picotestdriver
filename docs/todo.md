@@ -5,10 +5,6 @@
 
 
 ## fixes
-- [x] test_utils.lua: Replaced stub input simulation functions with state-based approach
-  - Provides test_set_button_state/test_get_button_state for games with custom input wrappers
-  - Includes example of how to make game code testable
-  - Documents that PICO-8's btn() can't be directly overridden
 
 
 ## new features
