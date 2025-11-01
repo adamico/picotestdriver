@@ -2,15 +2,18 @@
 
 ## [2.0.2] - 2025-11-01
 
-### Features
+### Added
 - feat: add color formatting to all help text and command output
+
+### Changed
+- refactor: improve changelog format with categorized sections
 
 ## [2.0.1] - 2025-11-01
 
-### Features
+### Added
 - feat: add comprehensive edge case tests to demo cartridge
 
-### Bug Fixes
+### Fixed
 - fix: improve test utilities and documentation
 
 ### Documentation

@@ -179,43 +179,117 @@ generate_changelog() {
         git_range="$to_ref"
     fi
     
-    # Extract conventional commits
+    # Extract commits by type
     local feat_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^feat:" || true)
     local fix_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^fix:" || true)
+    local docs_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^docs:" || true)
+    local refactor_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^refactor:" || true)
     local perf_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^perf:" || true)
+    local test_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^test:" || true)
+    local build_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^build:" || true)
+    local ci_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^ci:" || true)
+    local style_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^style:" || true)
+    local chore_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^chore:" || true)
+    local revert_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^revert:" || true)
     
-    if [ -z "$feat_commits" ] && [ -z "$fix_commits" ] && [ -z "$perf_commits" ]; then
-        print_color "$YELLOW" "No conventional commits (feat, fix, perf) found in range"
+    if [ -z "$feat_commits" ] && [ -z "$fix_commits" ] && [ -z "$docs_commits" ] && \
+       [ -z "$refactor_commits" ] && [ -z "$perf_commits" ] && [ -z "$test_commits" ] && \
+       [ -z "$build_commits" ] && [ -z "$ci_commits" ] && [ -z "$style_commits" ] && \
+       [ -z "$chore_commits" ] && [ -z "$revert_commits" ]; then
+        print_color "$YELLOW" "No conventional commits found in range"
         rm "$temp_file"
         return 1
     fi
     
-    # Generate simple changelog
+    # Generate changelog with sections (in priority order)
     {
         echo "## [Unreleased]"
         echo ""
         
         if [ -n "$feat_commits" ]; then
-            echo "### Features"
+            echo "### Added"
             echo "$feat_commits" | while read -r line; do
-                # Remove "feat: " prefix
-                echo "- ${line#feat: }"
+                echo "- $line"
             done
             echo ""
         fi
         
         if [ -n "$fix_commits" ]; then
-            echo "### Bug Fixes"
+            echo "### Fixed"
             echo "$fix_commits" | while read -r line; do
-                echo "- ${line#fix: }"
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$refactor_commits" ]; then
+            echo "### Changed"
+            echo "$refactor_commits" | while read -r line; do
+                echo "- $line"
             done
             echo ""
         fi
         
         if [ -n "$perf_commits" ]; then
-            echo "### Performance Improvements"
+            echo "### Performance"
             echo "$perf_commits" | while read -r line; do
-                echo "- ${line#perf: }"
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$docs_commits" ]; then
+            echo "### Documentation"
+            echo "$docs_commits" | while read -r line; do
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$style_commits" ]; then
+            echo "### Style"
+            echo "$style_commits" | while read -r line; do
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$test_commits" ]; then
+            echo "### Tests"
+            echo "$test_commits" | while read -r line; do
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$build_commits" ]; then
+            echo "### Build"
+            echo "$build_commits" | while read -r line; do
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$ci_commits" ]; then
+            echo "### CI/CD"
+            echo "$ci_commits" | while read -r line; do
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$chore_commits" ]; then
+            echo "### Chores"
+            echo "$chore_commits" | while read -r line; do
+                echo "- $line"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$revert_commits" ]; then
+            echo "### Reverted"
+            echo "$revert_commits" | while read -r line; do
+                echo "- $line"
             done
             echo ""
         fi
@@ -235,93 +309,55 @@ update_changelog() {
         print_color "$GREEN" "Created backup: $CHANGELOG_BACKUP" >&2
     fi
     
-    # Read generated content
-    local new_features=$(sed -n '/### Features/,/^$/p' "$generated_file" | grep -v "^### Features" | grep -v "^$" || true)
-    local new_fixes=$(sed -n '/### Bug Fixes/,/^$/p' "$generated_file" | grep -v "^### Bug Fixes" | grep -v "^$" || true)
-    local new_perf=$(sed -n '/### Performance Improvements/,/^$/p' "$generated_file" | grep -v "^### Performance Improvements" | grep -v "^$" || true)
+    # Extract sections from generated file
+    local sections=("Added" "Fixed" "Changed" "Performance" "Documentation" "Style" "Tests" "Build" "CI/CD" "Chores" "Reverted")
     
-    # Extract existing unreleased content (between header and first version, or between [Unreleased] and first version for backwards compat)
-    local existing_features=$(sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | sed -n '/### Features/,/^### \|^## \[/p' | grep "^- " || true)
-    local existing_fixes=$(sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | sed -n '/### Bug Fixes/,/^### \|^## \[/p' | grep "^- " || true)
-    local existing_perf=$(sed -n '/^# Changelog/,/^## \[[0-9]/p' "$CHANGELOG_FILE" | sed -n '/### Performance Improvements/,/^### \|^## \[/p' | grep "^- " || true)
+    # Function to extract commits for a section
+    extract_section() {
+        local section=$1
+        local file=$2
+        sed -n "/^### $section/,/^### \|^## \|^$/p" "$file" | grep "^- " || true
+    }
     
-    # Merge: Keep existing non-placeholder entries, add new ones (deduplicate)
-    local merged_features=""
-    if [ -n "$existing_features" ] && ! echo "$existing_features" | grep -q "None yet"; then
-        merged_features="$existing_features"
-    fi
-    if [ -n "$new_features" ]; then
-        if [ -n "$merged_features" ]; then
-            merged_features=$(echo -e "$merged_features\n$new_features" | sort -u)
-        else
-            merged_features="$new_features"
+    # Merge sections from existing and new
+    declare -A merged_sections
+    for section in "${sections[@]}"; do
+        local existing=$(extract_section "$section" "$CHANGELOG_FILE" 2>/dev/null || true)
+        local new=$(extract_section "$section" "$generated_file" 2>/dev/null || true)
+        
+        if [ -n "$existing" ] && [ -n "$new" ]; then
+            merged_sections["$section"]=$(echo -e "$existing\n$new" | sort -u)
+        elif [ -n "$existing" ]; then
+            merged_sections["$section"]="$existing"
+        elif [ -n "$new" ]; then
+            merged_sections["$section"]="$new"
         fi
-    fi
+    done
     
-    local merged_fixes=""
-    if [ -n "$existing_fixes" ] && ! echo "$existing_fixes" | grep -q "None yet"; then
-        merged_fixes="$existing_fixes"
-    fi
-    if [ -n "$new_fixes" ]; then
-        if [ -n "$merged_fixes" ]; then
-            merged_fixes=$(echo -e "$merged_fixes\n$new_fixes" | sort -u)
-        else
-            merged_fixes="$new_fixes"
-        fi
-    fi
-    
-    local merged_perf=""
-    if [ -n "$existing_perf" ] && ! echo "$existing_perf" | grep -q "None yet"; then
-        merged_perf="$existing_perf"
-    fi
-    if [ -n "$new_perf" ]; then
-        if [ -n "$merged_perf" ]; then
-            merged_perf=$(echo -e "$merged_perf\n$new_perf" | sort -u)
-        else
-            merged_perf="$new_perf"
-        fi
-    fi
-    
-    # Create new changelog with merged unreleased content
+    # Create new changelog with merged content
     {
         echo "# Changelog"
         echo ""
         
-        # Only show unreleased changes if there's actual content (not placeholders)
+        # Add sections in order
         local has_content=false
-        if [ -n "$merged_features" ] || [ -n "$merged_fixes" ] || [ -n "$merged_perf" ]; then
-            has_content=true
+        for section in "${sections[@]}"; do
+            if [ -n "${merged_sections[$section]}" ]; then
+                has_content=true
+                echo "### $section"
+                echo "${merged_sections[$section]}"
+                echo ""
+            fi
+        done
+        
+        # If we had content, add extra newline before versions
+        if [ "$has_content" = "true" ]; then
+            echo ""
         fi
         
-        if $has_content; then
-            if [ -n "$merged_features" ]; then
-                echo "### Features"
-                echo "$merged_features"
-                echo ""
-            fi
-            
-            if [ -n "$merged_fixes" ]; then
-                echo "### Bug Fixes"
-                echo "$merged_fixes"
-                echo ""
-            fi
-            
-            if [ -n "$merged_perf" ]; then
-                echo "### Performance Improvements"
-                echo "$merged_perf"
-                echo ""
-            fi
-        fi
-        
-        # Append all version sections (everything between first [Unreleased] and Project Context)
+        # Append all version sections (everything from first ## [version])
         if [ -f "$CHANGELOG_FILE" ]; then
-            # Find all content after the first [Unreleased] section ends, before Project Context
-            sed -n '/^## \[[0-9]/,/^## Project Context/p' "$CHANGELOG_FILE" | sed '/^## Project Context/d'
-        fi
-        
-        # Append project context and footer from original
-        if [ -f "$CHANGELOG_FILE" ]; then
-            sed -n '/^## Project Context/,$p' "$CHANGELOG_FILE"
+            sed -n '/^## \[[0-9]/,$p' "$CHANGELOG_FILE"
         fi
     } > "$CHANGELOG_FILE.new"
     
