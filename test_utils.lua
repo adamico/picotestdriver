@@ -1,6 +1,5 @@
--- PICO-8 Test Utilities
+-- PicoTestDriver Test Utilities
 -- Helper functions for common testing patterns
--- Version 1.0.0
 
 -- Input simulation helpers
 -- Simulate button press (call once per frame for hold)
@@ -160,11 +159,20 @@ function test_measure_performance(test_func, iterations, name)
     }
 end
 
--- Memory usage approximation (PICO-8 has limited introspection)
+-- Memory usage logging using PICO-8's stat(0)
+-- stat(0) returns Lua memory usage in bytes
 function test_log_memory_usage(label)
-    -- PICO-8 doesn't expose memory usage directly
-    -- This is just for documentation
-    test_log("Memory check: " .. (label or "current state"), "debug")
+    local mem_bytes = stat(0)
+    local mem_kb = flr(mem_bytes / 1024 * 10) / 10  -- Round to 1 decimal
+    test_log("Memory: " .. mem_kb .. "kb (" .. (label or "current") .. ")", "debug")
+end
+
+-- CPU usage logging using PICO-8's stat(1)
+-- stat(1) returns CPU usage (1.0 = 100%)
+function test_log_cpu_usage(label)
+    local cpu = stat(1)
+    local cpu_pct = flr(cpu * 1000) / 10  -- Convert to percentage with 1 decimal
+    test_log("CPU: " .. cpu_pct .. "% (" .. (label or "current") .. ")", "debug")
 end
 
 -- Test result collection
@@ -186,7 +194,7 @@ function test_record_result(passed, test_name, failure_message)
     test_results.total = test_results.total + 1
     if passed then
         test_results.passed = test_results.passed + 1
-        test_log("✓ " .. (test_name or "Test") .. " PASSED", "info")
+        test_log("[PASS] " .. (test_name or "Test"), "info")
     else
         test_results.failed = test_results.failed + 1
         local failure = {
@@ -195,7 +203,7 @@ function test_record_result(passed, test_name, failure_message)
             frame = test_get_frame_count()
         }
         add(test_results.failures, failure)
-        test_log("✗ " .. failure.name .. " FAILED: " .. failure.message, "error")
+        test_log("[FAIL] " .. failure.name .. ": " .. failure.message, "error")
     end
 end
 
@@ -236,6 +244,7 @@ test_start_timer = test_start_timer
 test_end_timer = test_end_timer
 test_measure_performance = test_measure_performance
 test_log_memory_usage = test_log_memory_usage
+test_log_cpu_usage = test_log_cpu_usage
 test_reset_results = test_reset_results
 test_record_result = test_record_result
 test_print_results = test_print_results

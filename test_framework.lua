@@ -1,14 +1,12 @@
--- PICO-8 Automated Testing Framework
+-- PicoTestDriver - Automated Testing Framework
 -- Core library for test management and execution
--- Version 1.0.0
 
 local test_framework = {
-    version = "1.0.0",
     subtest = nil,
     completed = false,
     frame_count = 0,
     options = {},
-    overrides = {}  -- Store original functions for restoration
+    overrides = {} -- Store original functions for restoration
 }
 
 -- Initialize the test framework
@@ -29,7 +27,7 @@ function test_init(options)
     -- Read command line parameters (format: "subtest:timeout" or just "subtest")
     local cmd_args = stat(6)
     test_framework.subtest = cmd_args
-    
+
     -- Parse subtest and timeout from command line
     if cmd_args and cmd_args ~= "" then
         local colon_pos = 0
@@ -39,15 +37,17 @@ function test_init(options)
                 break
             end
         end
-        
+
         if colon_pos > 0 then
             test_framework.subtest = sub(cmd_args, 1, colon_pos - 1)
             local timeout_str = sub(cmd_args, colon_pos + 1)
             local timeout_sec = tonum(timeout_str)
             if timeout_sec and timeout_sec > 0 then
-                test_framework.options.timeout_frames = timeout_sec * 60  -- Convert seconds to frames
+                test_framework.options.timeout_frames = timeout_sec * 60 -- Convert seconds to frames
                 test_framework.options.timeout_seconds = timeout_sec
-                test_log("Timeout set from command line: " .. timeout_sec .. "s (" .. test_framework.options.timeout_frames .. " frames)", "debug")
+                test_log(
+                "Timeout set from command line: " ..
+                timeout_sec .. "s (" .. test_framework.options.timeout_frames .. " frames)", "debug")
             end
         end
     end
@@ -169,7 +169,7 @@ end
 function test_run_subtest(subtest_name, test_func)
     if test_framework.subtest == subtest_name or test_framework.subtest == "all" then
         test_log("Running test subtest: " .. subtest_name, "info")
-        test_func()  -- Direct call, no pcall in PICO-8
+        test_func() -- Direct call, no pcall in PICO-8
         return true
     end
     return true
@@ -182,7 +182,7 @@ function test_wait_frames(count)
         -- This would be called from the main loop
         -- In practice, this is handled by the main _update60 loop
         test_log("Waiting... frame " .. test_framework.frame_count .. "/" .. (start_frame + count), "debug")
-        break  -- Let the main loop handle frame progression
+        break -- Let the main loop handle frame progression
     end
 end
 

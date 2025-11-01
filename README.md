@@ -6,7 +6,7 @@
 
 A comprehensive automated testing framework for PICO-8 cartridges, enabling developers to create, run, and debug tests with detailed output and command-line integration.
 
-## ✨ Features
+## Features
 
 - **Automated Testing**: Run tests programmatically with detailed logging
 - **Command-Line Integration**: Execute specific test subtests via script parameters
@@ -17,7 +17,7 @@ A comprehensive automated testing framework for PICO-8 cartridges, enabling deve
 - **Easy Integration**: Drop-in framework for existing PICO-8 projects
 - **Cross-Platform**: Works on Linux, macOS, and Windows (via WSL)
 
-## � Table of Contents
+## Table of Contents
 
 - [Quick Start](#-quick-start)
 - [Documentation](#-documentation)
@@ -30,7 +30,7 @@ A comprehensive automated testing framework for PICO-8 cartridges, enabling deve
 - [Contributing](#-contributing)
 - [License](#-license)
 
-## �🚀 Quick Start
+## Quick Start
 
 ### 1. Download the Framework
 
@@ -135,13 +135,12 @@ function _update60()
 end
 ```
 
-## 📖 Documentation
+## Documentation
 
 ### Core API
 
 #### Test Framework
 
-```lua
 ```lua
 -- Initialize the framework
 test_init(options)
@@ -171,7 +170,6 @@ test_complete()
 -- Update frame counter (call in _update60)
 -- Automatically calls test_complete() when timeout is reached
 test_update_frame()
-```
 
 -- Logging
 test_log("Message", "info")  -- "info", "debug", "warn", "error"
@@ -195,7 +193,9 @@ test_start_timer()
 -- ... run test code ...
 local duration = test_end_timer()
 
--- Performance testing
+-- Performance monitoring
+test_log_memory_usage("Before initialization")
+test_log_cpu_usage("After complex operation")
 local result = test_measure_performance(my_function, 100, "My Function")
 ```
 
@@ -280,28 +280,33 @@ PicoTestDriver returns standard exit codes for automation and CI/CD integration:
 
 #### The --list Option
 
-The `--list` (or `-l`) option inspects your test cartridge and displays all available test phases. It searches for `test_init()` calls in:
+The `--list` (or `-l`) option inspects your test cartridge and displays all available test subtests. It searches for subtest definitions in:
 
 1. The cartridge file itself (`.p8`)
 2. All included `.lua` files (excluding `test_framework.lua` and `test_utils.lua`)
 
-This helps you discover what test phases are available in your cartridge without having to examine the code manually.
+This helps you discover what test subtests are available in your cartridge without having to examine the code manually.
 
 **Examples:**
 
 ```bash
-# List phases in default cartridge
-./run_test.sh --list
+# List subtests in demo cartridge
+./ptd test -d --list
 
-# List phases in specific cartridge
-./run_test.sh -l -c my_game_tests.p8
+# List subtests in specific cartridge
+./ptd test -c my_game_tests.p8 --list
 
 # Output example:
-Available test phases in 'test_cart.p8':
-  movement - Test phase
-  collision - Test phase
-  input - Test phase
-  boundary - Test phase
+Available test subtests in 'test_cart.p8':
+  assertions
+  boundary
+  collision
+  edge_cases
+  input
+  movement
+  timing
+
+Usage: ptd test -c test_cart.p8 SUBTEST
 ```
 
 ### Example Test
@@ -329,56 +334,32 @@ function test_player_movement()
 end
 ```
 
-## 🏗️ Architecture
+## Architecture
 
-### Shared Library Design
-
-The framework uses a **shared function library** to prevent code duplication and maintain consistency across components. This design ensures a single source of truth for common functionality.
-
-#### Component Overview
+PicoTestDriver uses a simple, unified architecture centered around the `ptd` command:
 
 ```
-lib/picotestdriver/
-├── lib/
-│   └── test_functions.sh           # Shared library (single source of truth)
-├── run_test.sh                     # Production test runner
-├── run_test_testable.sh            # Testable version for unit tests
-├── test/
-│   ├── test_helper.sh              # Test utilities
-│   ├── test_integration.sh         # Integration tests
-│   └── test_runner.sh              # Test suite runner
-├── test_framework.lua              # PicoTestDriver framework core
-└── test_utils.lua                  # PicoTestDriver utilities
+Command Line          PICO-8 Runtime          Test Cartridge
+    (ptd)      →      (stat(6) params)  →    (test_framework.lua)
+      ↓                      ↓                        ↓
+  Subcommands           Parse timeout           Run subtests
+  test/generate         Set frames              Log results
+                        Monitor timeout         Auto-complete
 ```
 
-#### Shared Functions Library (`lib/test_functions.sh`)
-
-All shell components source this library to access common functionality:
-
-- **`build_command(cart_file, phase, timeout, verbose)`**: Constructs PICO-8 command with proper timeout format (`-p phase:timeout`)
-- **`parse_arguments(...)`**: Command-line argument parsing
-- **`validate_timeout(timeout)`**: Input validation
-- **Color functions**: Terminal output formatting
-- **Help/configuration display**: User-facing documentation
-
-**Sourcing Pattern:**
-```bash
-source "$LIB_DIR/test_functions.sh"
-```
-
-#### Timeout Parameter Flow
+### Timeout Parameter Flow
 
 The framework passes timeout values from the shell to PICO-8 using stat(6):
 
-1. **Shell Layer** (`run_test.sh`):
+1. **Command Layer** (`ptd test`):
    ```bash
-   build_command "test.p8" "tap_test" "30" "false"
+   ptd test -c test.p8 tap_test 30
    # Generates: pico8 -run test.p8 -p tap_test:30
    ```
 
 2. **PICO-8 Layer** (`test_framework.lua`):
    ```lua
-   function test_init(phase)
+   function test_init(config)
        local cmd = stat(6)  -- e.g., "tap_test:30"
        local timeout = parse_timeout(cmd)  -- 30
        timeout_frames = timeout * 60  -- 1800 frames
@@ -394,76 +375,75 @@ The framework passes timeout values from the shell to PICO-8 using stat(6):
    end
    ```
 
-#### Benefits of Shared Library Architecture
-
-- **Single Source of Truth**: Function signatures defined once, used everywhere
-- **Consistency**: All components use identical parameter passing and validation
-- **Maintainability**: Changes propagate automatically to all consumers
-- **Testability**: Unit tests use same functions as production code
-- **Type Safety**: Centralized validation prevents parameter mismatches
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-pico8-test-framework/
-├── README.md                    # This file
-├── CHANGELOG.md                 # Project history (auto-generated from commits)
-├── LICENSE                      # MIT license
-├── run_test.sh                 # Test runner script
-├── run_test_testable.sh        # Testable version for unit tests
+picotestdriver/
+├── README.md                       # This file
+├── CHANGELOG.md                    # Project history  
+├── LICENSE                         # MIT license
+├── VERSION                         # Version number
+├── ptd                             # Main command (test & generate)
 ├── lib/
-│   ├── test_functions.sh        # Shared function library
-│   └── README.md                # Library documentation
+│   ├── test_functions.sh           # Shared function library (for tests)
+│   └── README.md                   # Library documentation
 ├── scripts/
-│   ├── generate_changelog.sh   # Automated changelog generator
-│   └── install_hooks.sh         # Git hooks installer
-├── test_framework.lua          # Core framework
-├── test_utils.lua              # Testing utilities
-├── test_cart.p8               # Example cartridge
-├── git-conventional-commits.yaml # Commit convention configuration
-├── .git-hooks/                 # Custom git hooks directory
-│   ├── commit-msg              # Commit message validation hook
-│   └── prepare-commit-msg      # Changelog update prompt
-├── .vscode/                    # VS Code workspace settings
-│   └── settings.json           # PICO-8 development configuration
-├── .github/                    # GitHub configuration
-│   └── copilot-instructions.md # AI assistant guidelines
-├── docs/                       # Documentation
-│   ├── integration_guide.md    # Integration tutorial
-│   ├── development_notes.md    # Implementation details
-│   ├── changelog_automation.md # Changelog generation guide
-│   └── ai_agent_workflow.md    # AI agent/CI workflow guide
-├── test/                       # Test suite
-│   ├── test_runner.sh          # Test suite executor
-│   ├── test_helper.sh          # Test utilities
-│   ├── test_integration.sh     # Integration tests
-│   └── README.md               # Test suite documentation
-└── examples/                   # Additional examples (future)
+│   ├── generate_changelog.sh      # Automated changelog generator
+│   └── install_hooks.sh            # Git hooks installer
+├── test_framework.lua             # Core testing framework
+├── test_utils.lua                 # Testing utilities
+├── main.lua                       # Demo test implementation
+├── test_cart.p8                  # Demo cartridge
+├── git-conventional-commits.yaml  # Commit convention config
+├── .git-hooks/                    # Custom git hooks
+│   ├── commit-msg                 # Commit message validation
+│   └── prepare-commit-msg         # Changelog prompt
+├── .vscode/                       # VS Code settings
+│   └── settings.json              # PICO-8 configuration
+├── .github/                       # GitHub configuration
+│   └── copilot-instructions.md    # AI assistant guidelines
+├── docs/                          # Documentation
+│   ├── integration_guide.md       # Integration tutorial
+│   ├── development_notes.md       # Implementation details
+│   ├── changelog_automation.md    # Changelog guide
+│   ├── ai_agent_workflow.md       # AI agent/CI guide
+│   └── todo.md                    # Project roadmap
+└── test/                          # Test suite (118 tests)
+    ├── test_runner.sh             # Test executor
+    ├── test_helper.sh             # Test utilities
+    ├── test_functions.sh          # Function tests
+    ├── test_integration.sh        # Integration tests
+    ├── test_e2e.sh                # End-to-end tests
+    ├── test_generator.sh          # Generator tests
+    ├── test_timeout_param.sh      # Timeout tests
+    ├── test_new_features.sh       # Feature tests
+    └── README.md                  # Test suite docs
 ```
 
-## 🎮 Example Output
+## Example Output
 
 ```
-=== PicoTestDriver v1.0.0 ===
+=== PicoTestDriver v2.0.0 ===
 Cartridge: test_cart.p8
-Phase: movement_test
+Subtest: movement
 Timeout: 30s
 
 Starting test execution...
 Press Ctrl+C to abort
 
-[INFO] Test framework initialized - Phase: movement_test
-[INFO] Running test phase: movement_test
-[INFO] Testing player movement
-[DEBUG] Assertion passed: 64 == 64
-[DEBUG] Assertion passed: 65 > 64
-[DEBUG] Assertion passed: 65 in range [60, 70]
-[INFO] Test completed successfully
+[INFO] === PICOTESTDRIVER DEMO ===
+[INFO] Starting subtest: movement
+[INFO] === MOVEMENT TEST ===
+[INFO] ✓ MOVEMENT: Player moves right
+[INFO] Advancing to subtest: collision
+[INFO] === COLLISION TEST ===
+[INFO] ✓ COLLISION: Detected when enemy is close
+[INFO] All subtests complete!
 
 Test execution completed successfully
 ```
 
-## 🔧 Integration Guide
+## Integration Guide
 
 ### Adding to Existing Cartridge
 
@@ -477,32 +457,53 @@ Test execution completed successfully
    ```lua
    function _init()
        init_game()
+       
+       -- Build subtest names list
+       local subtest_names = {}
+       for i = 1, #subtests do
+           subtest_names[i] = subtests[i].name
+       end
+       
        test_init({
-           phases = {"my_test", "another_test"},
+           subtests = subtest_names,
+           timeout_frames = 1800,  -- 30 seconds
            debug_level = "info"
        })
    end
    ```
 
-3. **Update `_update60()`**:
+3. **Define Your Subtests**:
+   ```lua
+   local subtests = {
+       { name = "player_test", duration = 120 },
+       { name = "enemy_test", duration = 180 },
+   }
+   ```
+
+4. **Update `_update60()`**:
    ```lua
    function _update60()
        test_update_frame()
 
-       local phase = test_get_phase()
-       if phase == "my_test" then
-           run_my_test()
-       else
-           update_game()
+       local subtest = subtests[current_subtest]
+       if subtest then
+           if subtest.name == "player_test" then
+               test_player()
+           elseif subtest.name == "enemy_test" then
+               test_enemy()
+           end
        end
    end
    ```
 
-4. **Create Test Functions**:
+5. **Create Test Functions**:
    ```lua
-   function run_my_test()
+   function test_player()
        test_assert_equal(player.health, 100, "Player starts with full health")
-       test_complete()
+       -- Complete when duration reached
+       if subtest_frame >= subtests[current_subtest].duration then
+           next_subtest()
+       end
    end
    ```
 
@@ -510,17 +511,18 @@ Test execution completed successfully
 
 ```bash
 # From your project directory
-/path/to/run_test.sh my_test
+/path/to/ptd test -c my_test.p8
 
-# Or copy run_test.sh to your project
-cp /path/to/run_test.sh ./run_test.sh
-./run_test.sh my_test
+# Or copy ptd to your project
+cp /path/to/ptd ./ptd
+chmod +x ./ptd
+./ptd test -c my_test.p8
+
+# Run specific subtest
+./ptd test -c my_test.p8 player_test
 ```
 
-## 🧪 Test Patterns
-
-### For Contributors
-- **[Copilot Instructions](.github/copilot-instructions.md)** - AI assistant context for framework development
+## Test Patterns
 
 ### Unit Testing Game Logic
 
@@ -568,21 +570,24 @@ function test_render_performance()
 end
 ```
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-repo/pico8-test-framework.git
-cd pico8-test-framework
+git clone https://github.com/adamico/picotestdriver.git
+cd picotestdriver
 
-# Run tests
-./run_test.sh
+# Run demo tests
+./ptd test -d
 
-# Run specific tests
-./run_test.sh movement_test --verbose
+# Run specific test
+./ptd test -d movement --verbose
+
+# Run test suite (118 tests)
+bash test/test_runner.sh
 ```
 
 ### AI-Assisted Development
@@ -596,7 +601,7 @@ This project includes [Copilot Instructions](.github/copilot-instructions.md) to
 
 However, AI suggestions should always be validated against PICO-8's specific constraints (token limits, available APIs, global scope requirements). The framework's patterns are designed to work within these limitations, so human judgment remains essential for ensuring compatibility.
 
-**Model Recommendations**: For PICO-8 development, Claude 4 generally provides more accurate suggestions than Grok due to better understanding of technical constraints and code patterns.
+**Model Recommendations**: For PICO-8 development, Claude Sonnet 4.5 generally provides very accurate suggestions due to a gret understanding of technical constraints and code patterns.
 
 ### Commit Conventions
 
@@ -654,24 +659,7 @@ The project includes optimized VS Code settings for PICO-8 development:
 4. Ensure all tests pass
 5. Submit a pull request
 
-## 📋 Roadmap
-
-### Version 1.1.0
-- [ ] Visual test results in PICO-8
-- [ ] Screenshot comparison for UI tests
-- [ ] Test result export (JSON/CSV)
-
-### Version 1.2.0
-- [ ] Integration with external test runners
-- [ ] Performance regression detection
-- [ ] Test coverage reporting
-
-### Future Versions
-- [ ] CI/CD pipeline integration
-- [ ] Collaborative testing features
-- [ ] Advanced mocking/stubbing
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -681,38 +669,45 @@ The project includes optimized VS Code settings for PICO-8 development:
 
 **"Test cartridge not found"**
 - Check that your `.p8` file exists
-- Ensure correct path in `run_test.sh`
+- Ensure correct path is specified with `-c` option
+- Use absolute or relative path from current directory
 
 **Tests not running**
 - Verify framework files are included with `#include`
 - Check that `test_init()` is called in `_init()`
 - Ensure `test_update_frame()` is called in `_update60()`
+- Verify subtest definitions match the requested subtest name
 
 ### Debug Tips
 
 Enable verbose logging:
 ```bash
-./run_test.sh my_test --verbose
+./ptd test -c my_test.p8 --verbose
 ```
 
-Check PICO-8 console output for detailed logs.
+List available subtests:
+```bash
+./ptd test -c my_test.p8 --list
+```
 
-## 📄 License
+Check PICO-8 console output for detailed logs and test_log() messages.
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built for the PICO-8 community
 - Inspired by testing frameworks in other languages
 - Thanks to all contributors and testers
 
-## 📞 Support
+## Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-repo/pico8-test-framework/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-repo/pico8-test-framework/discussions)
+- **Issues**: [GitHub Issues](https://github.com/adamico/picotestdriver/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/adamico/picotestdriver/discussions)
 - **PICO-8 BBS**: Post in the development tools thread
 
 ---
 
-**Happy Testing!** 🎮✨
+**Happy Testing!**
