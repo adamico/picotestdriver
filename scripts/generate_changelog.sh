@@ -51,6 +51,93 @@ check_dependencies() {
     fi
 }
 
+# Validate CHANGELOG is in sync with git tags
+validate_changelog_sync() {
+    if [ ! -f "$CHANGELOG_FILE" ]; then
+        return 0  # No changelog yet, nothing to validate
+    fi
+    
+    # Get all version tags (v1.0.0 format or 1.0.0 format)
+    local git_tags=$(git tag -l | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/^v//' | sort -V)
+    
+    if [ -z "$git_tags" ]; then
+        return 0  # No tags yet
+    fi
+    
+    # Get versions from CHANGELOG (extract [X.Y.Z] format)
+    local changelog_versions=$(grep -oP '(?<=## \[)[0-9]+\.[0-9]+\.[0-9]+(?=\])' "$CHANGELOG_FILE" | sort -V)
+    
+    # Find missing versions (in git tags but not in changelog)
+    local missing_versions=""
+    while IFS= read -r tag_version; do
+        if ! echo "$changelog_versions" | grep -q "^${tag_version}$"; then
+            missing_versions="${missing_versions}${tag_version}"$'\n'
+        fi
+    done <<< "$git_tags"
+    
+    if [ -n "$missing_versions" ]; then
+        print_color "$YELLOW" "Warning: CHANGELOG is out of sync with git tags!" >&2
+        print_color "$YELLOW" "Missing versions in CHANGELOG:" >&2
+        echo "$missing_versions" | grep -v '^$' | while read -r version; do
+            local tag_date=$(git log -1 --format=%ad --date=short "v${version}" 2>/dev/null || git log -1 --format=%ad --date=short "${version}" 2>/dev/null)
+            echo "  - $version (tagged on ${tag_date:-unknown})" >&2
+        done
+        echo "" >&2
+        
+        if [ "$auto_accept" = "true" ]; then
+            print_color "$GREEN" "Auto-adding missing versions to CHANGELOG..." >&2
+            add_missing_versions "$missing_versions"
+            return 0
+        fi
+        
+        read -p "Add missing versions to CHANGELOG? (y/n): " -n 1 -r >&2
+        echo "" >&2
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            add_missing_versions "$missing_versions"
+        else
+            print_color "$YELLOW" "Skipping sync. CHANGELOG may be incomplete." >&2
+        fi
+    fi
+}
+
+# Add missing versions to CHANGELOG
+add_missing_versions() {
+    local missing_versions=$1
+    
+    # Backup current changelog
+    cp "$CHANGELOG_FILE" "$CHANGELOG_BACKUP"
+    
+    # Sort missing versions in descending order
+    local sorted_missing=$(echo "$missing_versions" | grep -v '^$' | sort -V -r)
+    
+    # Create entries for each missing version
+    local entries_file=$(mktemp)
+    echo "$sorted_missing" | while read -r version; do
+        local tag_date=$(git log -1 --format=%ad --date=short "v${version}" 2>/dev/null || git log -1 --format=%ad --date=short "${version}" 2>/dev/null)
+        [ -z "$tag_date" ] && tag_date=$(date +%Y-%m-%d)
+        
+        print_color "$GREEN" "Adding version $version to CHANGELOG..." >&2
+        
+        echo "## [$version] - $tag_date"
+        echo ""
+        echo "### Features"
+        echo "- See git history for details: \`git log v${version}\`"
+        echo ""
+    done > "$entries_file"
+    
+    # Rebuild changelog: everything before footer + new entries + footer
+    local temp_file=$(mktemp)
+    sed -n '1,/^---/p' "$CHANGELOG_FILE" | sed '$d' > "$temp_file"
+    cat "$entries_file" >> "$temp_file"
+    sed -n '/^---/,$p' "$CHANGELOG_FILE" >> "$temp_file"
+    
+    mv "$temp_file" "$CHANGELOG_FILE"
+    rm -f "$entries_file" "$CHANGELOG_BACKUP"
+    
+    print_color "$YELLOW" "Note: Added versions before footer. You may want to manually reorder for chronological sorting." >&2
+    print_color "$GREEN" "CHANGELOG synchronized with git tags!" >&2
+}
+
 # Get the latest tag
 get_latest_tag() {
     git describe --tags --abbrev=0 2>/dev/null || echo ""
@@ -407,6 +494,12 @@ main() {
     
     print_color "$BLUE" "=== Changelog Generator ==="
     echo ""
+    
+    # Validate CHANGELOG is in sync with git tags (skip in release mode)
+    if [ "$release_mode" != "true" ]; then
+        validate_changelog_sync
+        echo ""
+    fi
     
     # Handle release mode
     if [ "$release_mode" = "true" ]; then

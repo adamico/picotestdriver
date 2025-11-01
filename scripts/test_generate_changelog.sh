@@ -345,6 +345,45 @@ EOF
     rm -f "$test_changelog"
 }
 
+# Test 12: Sync validation with git tags
+test_sync_validation() {
+    print_color "$YELLOW" "Test: Sync validation detects and fixes missing versions"
+    
+    # This test requires git tags, so we'll skip in environments without them
+    if ! git tag -l | grep -q "v1.0.0"; then
+        print_color "$YELLOW" "  ⊘ Skipped (no git tags found)"
+        return 0
+    fi
+    
+    # Create test changelog missing v1.0.0
+    local test_changelog=$(mktemp)
+    cat > "$test_changelog" << 'EOF'
+# Changelog
+
+## [Unreleased]
+
+### Features
+- None yet
+
+## [1.1.0] - 2025-11-01
+
+### Features
+- Some feature
+EOF
+    
+    # Run with auto-accept to add missing version
+    local output=$(cd "$SCRIPT_DIR/.." && CHANGELOG_FILE="$test_changelog" "$GENERATE_SCRIPT" --auto-accept 2>&1)
+    
+    # Check that warning was shown
+    assert_contains "$output" "out of sync" "Warning about out of sync shown"
+    
+    # Check that version was added
+    assert_contains "$(cat "$test_changelog")" "## [1.0.0]" "Missing version v1.0.0 added"
+    
+    # Cleanup
+    rm -f "$test_changelog"
+}
+
 # Main test runner
 main() {
     print_color "$YELLOW" "=== Changelog Generation Script Tests ==="
@@ -368,6 +407,7 @@ main() {
     test_multiple_commits
     test_sorted_output
     test_release_functionality
+    test_sync_validation
     
     # Summary
     echo ""
