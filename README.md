@@ -42,35 +42,60 @@ cd picotestdriver
 ./run_test.sh -c my_game.p8 tap_test 45
 ```
 
-### 3. Integrate into Your Project
+### 3. Generate Test Files (New!)
 
-Add these lines to your cartridge:
+Use the test file generator to create boilerplate:
+
+```bash
+# Generate test files with defaults
+./generate_test.sh -d tests -n my_game_test
+
+# Generate with custom subtests and timeout
+./generate_test.sh -d tests -n my_game_test \
+  -s "player,enemy,bullet,collision" \
+  -t 60
+
+# See all options
+./generate_test.sh --help
+```
+
+This creates:
+- `tests/my_game_test.p8` - Cartridge with #include statements
+- `tests/my_game_test.lua` - Test file with subtest boilerplate
+
+### 4. Integrate into Your Project (Manual)
+
+Or add these lines to your cartridge manually:
 
 ```lua
 #include test_framework.lua
-#include test_utils.lua
+#include test.lua
 
 function _init()
     -- Initialize your game
     init_game()
 
     -- Initialize test framework
+    local subtest_names = {}
+    for i = 1, #subtests do
+        subtest_names[i] = subtests[i].name
+    end
+    
     test_init({
-        phases = {"movement", "combat", "ui"},
-        default_phase = "all"
+        subtests = subtest_names,
+        timeout_frames = 1800,  -- 30 seconds
+        debug_level = "info"
     })
 end
 
 function _update60()
     test_update_frame()
 
-    -- Run tests or normal game logic
-    local phase = test_get_phase()
-    if phase == "movement" then
-        test_movement()
-    elseif phase == "all" then
-        -- Normal game update
-        update_game()
+    -- Run your test subtests
+    local subtest = subtests[current_subtest]
+    if subtest then
+        local subtest_frame = test_frame - subtest_start_frame
+        -- Dispatch to test functions...
     end
 end
 ```
