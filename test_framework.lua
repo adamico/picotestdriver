@@ -4,7 +4,7 @@
 
 local test_framework = {
     version = "1.0.0",
-    phase = nil,
+    subtest = nil,
     completed = false,
     frame_count = 0,
     options = {},
@@ -13,24 +13,24 @@ local test_framework = {
 
 -- Initialize the test framework
 -- options: {
---   phases = {"phase1", "phase2", ...},  -- Available test phases
---   default_phase = "phase1",            -- Default phase if none specified
---   timeout_frames = 1800,               -- Default timeout (30 seconds at 60fps)
---   timeout_seconds = nil,               -- Optional: override with seconds from command line
---   debug_level = "info"                 -- "none", "info", "debug"
+--   subtests = {"subtest1", "subtest2", ...},  -- Available test subtests
+--   default_subtest = "subtest1",              -- Default subtest if none specified
+--   timeout_frames = 1800,                     -- Default timeout (30 seconds at 60fps)
+--   timeout_seconds = nil,                     -- Optional: override with seconds from command line
+--   debug_level = "info"                       -- "none", "info", "debug"
 -- }
 function test_init(options)
     test_framework.options = options or {}
-    test_framework.options.phases = test_framework.options.phases or {}
-    test_framework.options.default_phase = test_framework.options.default_phase or "default"
+    test_framework.options.subtests = test_framework.options.subtests or {}
+    test_framework.options.default_subtest = test_framework.options.default_subtest or "default"
     test_framework.options.timeout_frames = test_framework.options.timeout_frames or 1800
     test_framework.options.debug_level = test_framework.options.debug_level or "info"
 
-    -- Read command line parameters (format: "phase:timeout" or just "phase")
+    -- Read command line parameters (format: "subtest:timeout" or just "subtest")
     local cmd_args = stat(6)
-    test_framework.phase = cmd_args
+    test_framework.subtest = cmd_args
     
-    -- Parse phase and timeout from command line
+    -- Parse subtest and timeout from command line
     if cmd_args and cmd_args ~= "" then
         local colon_pos = 0
         for i = 1, #cmd_args do
@@ -41,7 +41,7 @@ function test_init(options)
         end
         
         if colon_pos > 0 then
-            test_framework.phase = sub(cmd_args, 1, colon_pos - 1)
+            test_framework.subtest = sub(cmd_args, 1, colon_pos - 1)
             local timeout_str = sub(cmd_args, colon_pos + 1)
             local timeout_sec = tonum(timeout_str)
             if timeout_sec and timeout_sec > 0 then
@@ -52,30 +52,30 @@ function test_init(options)
         end
     end
 
-    -- Validate phase
-    if test_framework.phase and test_framework.phase ~= "" and test_framework.phase ~= "timeout" then
-        local valid_phase = false
-        for _, phase in ipairs(test_framework.options.phases) do
-            if phase == test_framework.phase then
-                valid_phase = true
+    -- Validate subtest
+    if test_framework.subtest and test_framework.subtest ~= "" and test_framework.subtest ~= "timeout" then
+        local valid_subtest = false
+        for _, subtest in ipairs(test_framework.options.subtests) do
+            if subtest == test_framework.subtest then
+                valid_subtest = true
                 break
             end
         end
-        if not valid_phase and test_framework.phase ~= "all" then
-            printh("WARNING: Unknown test phase '" .. test_framework.phase .. "'")
-            test_framework.phase = test_framework.options.default_phase
+        if not valid_subtest and test_framework.subtest ~= "all" then
+            printh("WARNING: Unknown test subtest '" .. test_framework.subtest .. "'")
+            test_framework.subtest = test_framework.options.default_subtest
         end
     else
-        test_framework.phase = test_framework.options.default_phase
+        test_framework.subtest = test_framework.options.default_subtest
     end
 
-    test_log("Test framework initialized - Phase: " .. test_framework.phase, "info")
-    -- Note: table.concat not available in PICO-8, skip phase listing
+    test_log("Test framework initialized - Subtest: " .. test_framework.subtest, "info")
+    -- Note: table.concat not available in PICO-8, skip subtest listing
 end
 
--- Get current test phase
-function test_get_phase()
-    return test_framework.phase
+-- Get current test subtest
+function test_get_subtest()
+    return test_framework.subtest
 end
 
 -- Check if test is completed
@@ -84,9 +84,10 @@ function test_is_completed()
 end
 
 -- Mark test as completed
-function test_complete()
+function test_complete(message)
     test_framework.completed = true
-    test_log("Test completed successfully", "info")
+    local msg = message or "Test completed successfully"
+    test_log(msg, "info")
     -- Stop PICO-8 execution when test is complete
     stop()
 end
@@ -112,12 +113,12 @@ function test_update_frame()
 
     -- Check for timeout
     if test_framework.frame_count >= test_framework.options.timeout_frames then
-        local timeout_msg = "Test execution timed out after " .. test_framework.frame_count .. " frames"
+        local timeout_msg = "TIMEOUT: Test execution timed out after " .. test_framework.frame_count .. " frames"
         if test_framework.options.timeout_seconds then
             timeout_msg = timeout_msg .. " (" .. test_framework.options.timeout_seconds .. "s)"
         end
         test_log(timeout_msg, "error")
-        test_complete()
+        test_complete("Test timed out")
     end
 end
 
@@ -162,10 +163,10 @@ function test_restore_all_functions()
     test_log("Function restoration not implemented - manually restore functions", "warn")
 end
 
--- Run a test phase (simplified for PICO-8)
-function test_run_phase(phase_name, test_func)
-    if test_framework.phase == phase_name or test_framework.phase == "all" then
-        test_log("Running test phase: " .. phase_name, "info")
+-- Run a test subtest (simplified for PICO-8)
+function test_run_subtest(subtest_name, test_func)
+    if test_framework.subtest == subtest_name or test_framework.subtest == "all" then
+        test_log("Running test subtest: " .. subtest_name, "info")
         test_func()  -- Direct call, no pcall in PICO-8
         return true
     end

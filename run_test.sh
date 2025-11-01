@@ -49,23 +49,23 @@ PICO-8 Automated Testing Framework Runner v${SCRIPT_VERSION}
 This script runs PICO-8 cartridges with automated testing capabilities.
 
 USAGE:
-    ./run_test.sh [OPTIONS] [PHASE] [TIMEOUT]
+    ./run_test.sh [OPTIONS] [SUBTEST] [TIMEOUT]
 
 ARGUMENTS:
-    PHASE       Test phase to run (default: all)
-                Common phases: movement, collision, input, boundary
+    SUBTEST     Test subtest to run (default: all)
+                Common subtests: movement, collision, input, boundary
     TIMEOUT     Maximum runtime in seconds (default: ${DEFAULT_TIMEOUT})
 
 OPTIONS:
     -h, --help      Show this help message
     -c, --cart      Specify the test cartridge file (default: test_cart.p8)
-    -l, --list      List available test phases (requires cartridge)
+    -l, --list      List available test subtests (requires cartridge)
     -v, --version   Show version information
     --verbose       Enable verbose output
 
 EXAMPLES:
     ./run_test.sh
-        Run all test phases with default timeout
+        Run all test subtests with default timeout
 
     ./run_test.sh movement_test
         Run only movement tests
@@ -77,7 +77,7 @@ EXAMPLES:
         Run tests in my_test.p8 cartridge
 
     ./run_test.sh --list
-        List all available test phases
+        List all available test subtests
 
 REQUIREMENTS:
     - PICO-8 executable must be in PATH
@@ -113,28 +113,40 @@ check_cartridge() {
 }
 
 # Function to handle --list option
-handle_list_phases() {
+handle_list_subtests() {
     local cart_file=$1
-    print_color $BLUE "Available test phases in '$cart_file':"
+    print_color $BLUE "Available test subtests in '$cart_file':"
     echo ""
 
     # Get the directory of the cartridge file
     local cart_dir
     cart_dir=$(dirname "$cart_file")
 
-    # Collect all phases from cartridge and included files
-    local all_phases=""
-    local found_phases=false
+    # Collect all subtests from cartridge and included files
+    local all_subtests=""
+    local found_subtests=false
+
+    # Function to extract subtest names from a file
+    extract_subtests() {
+        local file=$1
+        # Look for: local subtests = { followed by { name = "xxx", ... } entries
+        # Extract subtest names from table definitions
+        local names
+        names=$(awk '/local subtests\s*=\s*\{/,/^\}/ {
+            if ($0 ~ /name\s*=\s*"[^"]+"|name\s*=\s*'\''[^'\'']+'\''/) {
+                match($0, /(name\s*=\s*["'\''])([^"'\'']+)(["'\''])/, arr)
+                if (arr[2] != "") print arr[2]
+            }
+        }' "$file")
+        echo "$names"
+    }
 
     # First check the cartridge file itself
-    local phases_line
-    phases_line=$(grep -A 20 "test_init" "$cart_file" | grep "phases\s*=\s*{" | head -1)
-
-    if [ -n "$phases_line" ]; then
-        local phases_array
-        phases_array=$(echo "$phases_line" | sed 's/.*phases\s*=\s*{//' | sed 's/}.*//')
-        all_phases="$phases_array"
-        found_phases=true
+    local cart_subtests
+    cart_subtests=$(extract_subtests "$cart_file")
+    if [ -n "$cart_subtests" ]; then
+        all_subtests="$cart_subtests"
+        found_subtests=true
     fi
 
     # Then check included .lua files (excluding test_framework.lua and test_utils.lua)
@@ -153,52 +165,46 @@ handle_list_phases() {
         fi
 
         if [ -f "$resolved_path" ]; then
-            phases_line=$(grep -A 20 "test_init" "$resolved_path" | grep "phases\s*=\s*{" | head -1)
-            if [ -n "$phases_line" ]; then
-                local phases_array
-                phases_array=$(echo "$phases_line" | sed 's/.*phases\s*=\s*{//' | sed 's/}.*//')
-                if [ -n "$all_phases" ]; then
-                    all_phases="$all_phases,$phases_array"
+            local file_subtests
+            file_subtests=$(extract_subtests "$resolved_path")
+            if [ -n "$file_subtests" ]; then
+                if [ -n "$all_subtests" ]; then
+                    all_subtests="$all_subtests"$'\n'"$file_subtests"
                 else
-                    all_phases="$phases_array"
+                    all_subtests="$file_subtests"
                 fi
-                found_phases=true
+                found_subtests=true
             fi
         fi
     done
 
-    if [ "$found_phases" = true ]; then
-        # Remove duplicates and split by comma and process each phase
-        local unique_phases
-        unique_phases=$(echo "$all_phases" | tr ',' '\n' | sort | uniq | tr '\n' ',' | sed 's/,$//')
+    if [ "$found_subtests" = true ]; then
+        # Remove duplicates and sort
+        local unique_subtests
+        unique_subtests=$(echo "$all_subtests" | sort | uniq)
 
-        IFS=',' read -ra PHASE_ARRAY <<< "$unique_phases"
-
-        for phase in "${PHASE_ARRAY[@]}"; do
-            # Trim whitespace and quotes
-            phase=$(echo "$phase" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/"//g' | sed "s/'//g")
-
-            if [ -n "$phase" ]; then
-                echo "  $phase - Test phase"
+        while IFS= read -r subtest; do
+            if [ -n "$subtest" ]; then
+                echo "  $subtest - Test subtest"
             fi
-        done
+        done <<< "$unique_subtests"
     else
-        print_color $YELLOW "No test_init function with phases found in cartridge or included files."
+        print_color $YELLOW "No local subtests table found in cartridge or included files."
         echo "  all - Run all tests"
         echo ""
-        print_color $YELLOW "Make sure your cartridge or included .lua files include a test_init call with a phases array."
+        print_color $YELLOW "Make sure your test file includes: local subtests = { { name = \"test_name\", ... }, ... }"
     fi
 
     echo ""
-    print_color $BLUE "Usage: $0 [-c CART_FILE] PHASE"
+    print_color $BLUE "Usage: $0 [-c CART_FILE] SUBTEST"
     print_color $BLUE "Example: $0 -c test_cart.p8 movement"
 }
 
 # Parse command line arguments
-PHASE="all"
+SUBTEST="all"
 TIMEOUT=$DEFAULT_TIMEOUT
 VERBOSE=false
-LIST_PHASES=false
+LIST_SUBTESTS=false
 CART_FILE="test_cart.p8"
 
 while [[ $# -gt 0 ]]; do
@@ -217,7 +223,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -l|--list)
-            LIST_PHASES=true
+            LIST_SUBTESTS=true
             shift
             ;;
         --verbose)
@@ -229,7 +235,7 @@ while [[ $# -gt 0 ]]; do
             if [[ $1 =~ ^[0-9]+$ ]]; then
                 TIMEOUT=$1
             else
-                PHASE=$1
+                SUBTEST=$1
             fi
             shift
             ;;
@@ -246,16 +252,16 @@ fi
 check_pico8
 check_cartridge "$CART_FILE"
 
-# Handle list phases option
-if $LIST_PHASES; then
-    handle_list_phases "$CART_FILE"
+# Handle list subtests option
+if $LIST_SUBTESTS; then
+    handle_list_subtests "$CART_FILE"
     exit 0
 fi
 
 # Show configuration
 print_color $BLUE "=== PICO-8 Test Framework Runner v${SCRIPT_VERSION} ==="
 echo "Cartridge: $CART_FILE"
-echo "Phase: $PHASE"
+echo "Subtest: $SUBTEST"
 echo "Timeout: ${TIMEOUT}s"
 if $VERBOSE; then
     echo "Verbose: enabled"
@@ -265,13 +271,13 @@ echo ""
 # Build command
 CMD="pico8 -run $CART_FILE"
 
-if [ "$PHASE" != "all" ]; then
-    CMD="$CMD -p $PHASE"
+if [ "$SUBTEST" != "all" ]; then
+    CMD="$CMD -p $SUBTEST"
 fi
 
-# Pass timeout to PICO-8 as a parameter (PHASE:TIMEOUT format)
-if [ "$PHASE" != "all" ]; then
-    CMD="pico8 -run $CART_FILE -p ${PHASE}:${TIMEOUT}"
+# Pass timeout to PICO-8 as a parameter (SUBTEST:TIMEOUT format)
+if [ "$SUBTEST" != "all" ]; then
+    CMD="pico8 -run $CART_FILE -p ${SUBTEST}:${TIMEOUT}"
 else
     CMD="pico8 -run $CART_FILE -p timeout:${TIMEOUT}"
 fi
