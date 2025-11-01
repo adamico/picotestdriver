@@ -16,6 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Performance Improvements
 - None yet
 
+## [1.1.3] - 2025-11-01
+
+
+### Features
+- add automatic CHANGELOG sync validation with git tags
+
+### Bug Fixes
+- None yet
+
+### Performance Improvements
+- None yet
+
+
 ## [1.1.2] - 2025-11-01
 
 
