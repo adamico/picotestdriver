@@ -1,5 +1,8 @@
 # Changelog
 
+### Features
+- remove [Unreleased] section from user-facing CHANGELOG
+
 ## [1.1.3] - 2025-11-01
 
 
