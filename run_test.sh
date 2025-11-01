@@ -261,6 +261,13 @@ if [ "$PHASE" != "all" ]; then
     CMD="$CMD -p $PHASE"
 fi
 
+# Pass timeout to PICO-8 as a parameter (PHASE:TIMEOUT format)
+if [ "$PHASE" != "all" ]; then
+    CMD="pico8 -run $CART_FILE -p ${PHASE}:${TIMEOUT}"
+else
+    CMD="pico8 -run $CART_FILE -p timeout:${TIMEOUT}"
+fi
+
 if $VERBOSE; then
     print_color $YELLOW "Command: $CMD"
     echo ""

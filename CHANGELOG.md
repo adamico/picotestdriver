@@ -1,82 +1,70 @@
-# Changelog & Project History
+# Changelog
 
-## Version 1.0.0 (October 31, 2025)
+All notable changes to this project will be documented in this file.
 
-### Initial Release
-- **Core Framework**: Complete testing framework with parameter parsing, phase management, and logging
-- **Test Utilities**: Rich assertion library, input simulation, and performance testing
-- **Command-Line Integration**: Bash script for automated test execution
-- **Example Cartridge**: Working demonstration of all framework features
-- **Comprehensive Documentation**: README, integration guide, and API reference
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### Development Timeline
+## [Unreleased]
 
-#### Phase 1: Core Game Testing (Previous Session)
-- Created sophisticated boundary crossing tests with detailed debug output
-- Developed function override system for runtime debugging
-- Implemented frame-based test execution with proper timing
-- Added comprehensive logging and assertion validation
+### Features
+- Shared functions library (`lib/test_functions.sh`) for code consistency
+- Timeout parameter passing from shell to PICO-8 via `-p phase:timeout`
+- Automatic test termination when timeout is reached
+- Architecture section in README documenting shared library design
 
-#### Phase 2: Framework Extraction (Current Session)
-- Extracted testing functionality into standalone framework
-- Created modular architecture with separate core and utility libraries
-- Developed cross-platform bash script for test execution
-- Built complete example cartridge demonstrating usage
-- Wrote comprehensive documentation and integration guides
+### Bug Fixes
+- Fixed code desync between `run_test.sh`, `run_test_testable.sh`, and `test_helper.sh`
+- Corrected `build_command()` function signature consistency across test suite
 
-### Key Features Implemented
-- ✅ Automated test execution via command line
-- ✅ Phase-based test organization
-- ✅ Rich assertion library with detailed error messages
-- ✅ Function override system for debugging
-- ✅ Performance measurement utilities
-- ✅ Frame-accurate test timing
-- ✅ Cross-platform compatibility
-- ✅ Easy integration with existing PICO-8 projects
+### Performance Improvements
+- None
 
-### Technical Achievements
-- **PICO-8 Compatibility**: Framework works within PICO-8's Lua limitations
-- **Command-Line Integration**: Uses `stat(6)` for parameter passing
-- **Debug Output**: Structured logging with multiple verbosity levels
-- **Modular Design**: Selective inclusion to manage token limits
-- **Error Handling**: Robust error reporting without exception handling
+## [1.0.1] - 2025-10-31
 
-## Version 1.0.1 (October 31, 2025)
+### Features
+- Git conventional commits configuration with validation hook
+- VS Code settings optimized for PICO-8 development
+- Copilot instructions for AI-assisted development
+- Comprehensive development workflow documentation
 
-### Development Environment Enhancements
-- **Git Configuration**: Added conventional commit hooks and configuration
-- **VS Code Settings**: PICO-8 optimized editor configuration with Lua language server
-- **Copilot Instructions**: Comprehensive AI assistant guidelines for framework development
-- **Documentation Updates**: Updated project structure and development setup guides
+### Documentation
+- Added `.git-hooks/commit-msg` for commit message validation
+- Created `git-conventional-commits.yaml` with commit type definitions
+- Added `.vscode/settings.json` for PICO-8 IDE integration
+- Created `.github/copilot-instructions.md` for AI assistant guidance
 
-### Configuration Files Added
-- `.git-hooks/commit-msg` - Commit message validation hook
-- `git-conventional-commits.yaml` - Commit convention definitions
-- `.vscode/settings.json` - PICO-8 development environment settings
-- `.github/copilot-instructions.md` - AI assistant context and patterns
+## [1.0.0] - 2025-10-31
 
-### Development Workflow Improvements
-- **Conventional Commits**: Standardized commit message format
-- **IDE Integration**: Optimized VS Code experience for PICO-8 development
-- **AI Assistance**: Detailed instructions for AI coding assistants
-- **Project Documentation**: Updated structure and contribution guidelines
+### Features
+- Core test framework with parameter parsing, phase management, and logging
+- Rich assertion library (`test_assert`, `test_assert_equal`, `test_assert_in_range`, etc.)
+- Input simulation utilities (`test_press_button`, `test_release_button`)
+- Performance measurement tools (`test_measure_performance`)
+- Command-line test runner (`run_test.sh`) with timeout support
+- Phase-based test organization for isolated testing
+- Function override system for runtime debugging
+- Frame-accurate test timing (60 FPS)
+- Cross-platform Bash script integration
+- Example cartridge demonstrating framework features
 
-### Known Limitations
-- Function override system requires manual restoration
-- No exception handling (PICO-8 limitation)
-- Single command-line parameter string
-- Manual test data cleanup required
+### Documentation
+- Comprehensive README with quick start guide
+- Integration guide for adding framework to existing projects
+- Development notes capturing design decisions and patterns
+- API reference for all framework functions
+- Test suite documentation
 
-### Future Roadmap
-- Visual test results in PICO-8
-- Screenshot comparison testing
-- Test result export functionality
-- CI/CD integration
-- Enhanced function override system
+### Technical Implementation
+- PICO-8 compatible Lua (works within platform limitations)
+- Command-line parameter passing via `stat(6)`
+- Structured logging with configurable verbosity levels
+- Modular architecture to manage token limits
+- Robust error reporting without exception handling
 
 ---
 
-## Development Context
+## Project Context
 
 This framework was developed as part of the **obsi** PICO-8 game project, where complex boundary mechanics and physics required sophisticated testing capabilities. The framework evolved from manual testing to automated command-line execution, then was extracted into a reusable community tool.
 
@@ -85,9 +73,22 @@ This framework was developed as part of the **obsi** PICO-8 game project, where 
 - **Challenge**: Complex boundary reversal physics with acceleration/deceleration
 - **Solution**: Automated testing with detailed debug output and frame-accurate simulation
 
-### Community Opportunity
-The framework addresses a gap in the PICO-8 ecosystem by providing professional-grade testing tools adapted for the platform's unique constraints and workflow.
+### Known Limitations
+- Function override system requires manual restoration
+- No exception handling (PICO-8 Lua limitation)
+- Single command-line parameter string
+- Manual test data cleanup required
+
+### Future Roadmap
+- Visual test results overlay in PICO-8
+- Screenshot comparison testing
+- Test result export functionality (JSON format)
+- CI/CD integration examples
+- Enhanced function override system with automatic restoration
+- Performance regression detection
+- Test coverage analysis
 
 ---
 
-*This changelog will be updated with future releases and significant changes.*
+*This changelog is maintained using [git-conventional-commits](https://github.com/qoomon/git-conventional-commits). 
+Run `scripts/generate_changelog.sh` to auto-generate entries from commits.*

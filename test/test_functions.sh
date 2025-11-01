@@ -92,15 +92,15 @@ assert_equals "$expected" "$result" "parse_arguments should parse combined argum
 echo
 echo "Testing build_command function..."
 
-# Test basic command
-result=$(build_command "test.p8" "all" "false")
-expected="pico8 -run test.p8"
-assert_equals "$expected" "$result" "build_command should build basic command"
+# Test basic command with timeout
+result=$(build_command "test.p8" "all" "30" "false")
+expected="pico8 -run test.p8 -p timeout:30"
+assert_equals "$expected" "$result" "build_command should build basic command with timeout"
 
-# Test with phase
-result=$(build_command "test.p8" "movement_test" "false")
-expected="pico8 -run test.p8 -p movement_test"
-assert_equals "$expected" "$result" "build_command should include phase"
+# Test with phase and timeout
+result=$(build_command "test.p8" "movement_test" "45" "false")
+expected="pico8 -run test.p8 -p movement_test:45"
+assert_equals "$expected" "$result" "build_command should include phase with timeout"
 
 echo
 echo "Testing check_pico8 function..."

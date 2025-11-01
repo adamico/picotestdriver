@@ -1,27 +1,149 @@
 #!/bin/bash
 
-# Test helper functions - sources shared library to avoid code duplication
-# This prevents desync errors between the test suite and the runner script
+# PICO-8 Test Framework - Shared Functions Library
+# This file contains functions shared across the test runner and test suite
+# Source this file to avoid code duplication and desync issues
 
-# Get the directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_DIR="$(cd "$SCRIPT_DIR/../lib" && pwd)"
+# Configuration
+SCRIPT_VERSION="1.0.0"
+DEFAULT_TIMEOUT=30
 
-# Source the shared functions library
-source "$LIB_DIR/test_functions.sh"
+# Colors for output (can be overridden for testing)
+RED=${RED:-'\033[0;31m'}
+GREEN=${GREEN:-'\033[0;32m'}
+YELLOW=${YELLOW:-'\033[1;33m'}
+BLUE=${BLUE:-'\033[0;34m'}
+NC=${NC:-'\033[0m'} # No Color
 
-# The following functions are now available from test_functions.sh:
-# - print_color
-# - validate_timeout
-# - check_cartridge
-# - check_pico8
-# - parse_arguments
-# - build_command
-# - show_configuration
-# - show_help
-# - handle_list_phases
+# Function to print colored output
+print_color() {
+    local color=$1
+    local message=$2
+    echo -e "${color}${message}${NC}"
+}
 
-# Simplified show_help for testing (no exit, doesn't print full help)
+# Function to validate timeout value
+validate_timeout() {
+    local timeout=$1
+    if ! [[ $timeout =~ ^[0-9]+$ ]] || [ $timeout -le 0 ]; then
+        print_color $RED "Error: Invalid timeout '$timeout'. Must be a positive integer."
+        return 1
+    fi
+    return 0
+}
+
+# Function to check if cartridge exists
+check_cartridge() {
+    local cart_file=$1
+    if [ ! -f "$cart_file" ]; then
+        print_color $RED "Error: Test cartridge '$cart_file' not found"
+        return 3
+    fi
+    return 0
+}
+
+# Function to check if PICO-8 is available
+check_pico8() {
+    if ! command -v pico8 &> /dev/null; then
+        print_color $RED "Error: PICO-8 executable not found in PATH"
+        echo "Please ensure PICO-8 is installed and accessible."
+        return 2
+    fi
+    return 0
+}
+
+# Function to parse command line arguments
+# Returns: "phase|timeout|verbose|list_phases|cart_file"
+parse_arguments() {
+    local args=("$@")
+    local phase="all"
+    local timeout=$DEFAULT_TIMEOUT
+    local verbose=false
+    local list_phases=false
+    local cart_file="test_cart.p8"
+
+    while [[ ${#args[@]} -gt 0 ]]; do
+        case ${args[0]} in
+            -h|--help)
+                show_help
+                return 0
+                ;;
+            -v|--version)
+                echo "PICO-8 Test Framework Runner v${SCRIPT_VERSION}"
+                return 0
+                ;;
+            -c|--cart)
+                cart_file="${args[1]}"
+                args=("${args[@]:2}")
+                ;;
+            -l|--list)
+                list_phases=true
+                args=("${args[@]:1}")
+                ;;
+            --verbose)
+                verbose=true
+                args=("${args[@]:1}")
+                ;;
+            *)
+                # Check if it's a timeout value (number)
+                if [[ ${args[0]} =~ ^[0-9]+$ ]]; then
+                    timeout=${args[0]}
+                else
+                    phase=${args[0]}
+                fi
+                args=("${args[@]:1}")
+                ;;
+        esac
+    done
+
+    # Return parsed values
+    echo "$phase|$timeout|$verbose|$list_phases|$cart_file"
+}
+
+# Function to build PICO-8 command
+# Parameters: cart_file phase timeout verbose
+# Returns: Complete pico8 command string
+build_command() {
+    local cart_file=$1
+    local phase=$2
+    local timeout=$3
+    local verbose=$4
+
+    local cmd="pico8 -run $cart_file"
+
+    # Pass timeout to PICO-8 as a parameter (PHASE:TIMEOUT format)
+    if [ "$phase" != "all" ]; then
+        cmd="$cmd -p ${phase}:${timeout}"
+    else
+        cmd="$cmd -p timeout:${timeout}"
+    fi
+
+    if [ "$verbose" = "true" ]; then
+        print_color $YELLOW "Command: $cmd"
+        echo ""
+    fi
+
+    echo "$cmd"
+}
+
+# Function to show configuration
+show_configuration() {
+    local cart_file=$1
+    local phase=$2
+    local timeout=$3
+    local verbose=$4
+
+    print_color $BLUE "=== PICO-8 Test Framework Runner v${SCRIPT_VERSION} ==="
+    echo "Cartridge: $cart_file"
+    echo "Phase: $phase"
+    echo "Timeout: ${timeout}s"
+    if [ "$verbose" = "true" ]; then
+        echo "Verbose: enabled"
+    fi
+    echo ""
+}
+
+# Function to show help
 show_help() {
     cat << EOF
 PICO-8 Automated Testing Framework Runner v${SCRIPT_VERSION}
@@ -72,23 +194,6 @@ EXIT CODES:
 
 For more information, visit: https://github.com/your-repo/pico8-test-framework
 EOF
-}
-
-# Function to show configuration
-show_configuration() {
-    local cart_file=$1
-    local phase=$2
-    local timeout=$3
-    local verbose=$4
-
-    print_color $BLUE "=== PICO-8 Test Framework Runner v${SCRIPT_VERSION} ==="
-    echo "Cartridge: $cart_file"
-    echo "Phase: $phase"
-    echo "Timeout: ${timeout}s"
-    if [ "$verbose" = "true" ]; then
-        echo "Verbose: enabled"
-    fi
-    echo ""
 }
 
 # Function to handle list phases option

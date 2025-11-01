@@ -44,10 +44,10 @@ assert_contains "$list_output" "all" "list should contain all phases"
 echo
 echo "Testing command building with verbose output..."
 
-# Capture verbose command output
-verbose_output=$(build_command "test.p8" "collision_test" "true" 2>&1)
+# Capture verbose command output (cart_file, phase, timeout, verbose)
+verbose_output=$(build_command "test.p8" "collision_test" "30" "true" 2>&1)
 assert_contains "$verbose_output" "Command:" "verbose output should show command header"
-assert_contains "$verbose_output" "pico8 -run test.p8 -p collision_test" "verbose output should show full command"
+assert_contains "$verbose_output" "pico8 -run test.p8 -p collision_test:30" "verbose output should show full command"
 
 echo
 echo "Testing error handling scenarios..."

@@ -16,6 +16,7 @@ local test_framework = {
 --   phases = {"phase1", "phase2", ...},  -- Available test phases
 --   default_phase = "phase1",            -- Default phase if none specified
 --   timeout_frames = 1800,               -- Default timeout (30 seconds at 60fps)
+--   timeout_seconds = nil,               -- Optional: override with seconds from command line
 --   debug_level = "info"                 -- "none", "info", "debug"
 -- }
 function test_init(options)
@@ -25,12 +26,34 @@ function test_init(options)
     test_framework.options.timeout_frames = test_framework.options.timeout_frames or 1800
     test_framework.options.debug_level = test_framework.options.debug_level or "info"
 
-    -- Read command line parameters
+    -- Read command line parameters (format: "phase:timeout" or just "phase")
     local cmd_args = stat(6)
     test_framework.phase = cmd_args
+    
+    -- Parse phase and timeout from command line
+    if cmd_args and cmd_args ~= "" then
+        local colon_pos = 0
+        for i = 1, #cmd_args do
+            if sub(cmd_args, i, i) == ":" then
+                colon_pos = i
+                break
+            end
+        end
+        
+        if colon_pos > 0 then
+            test_framework.phase = sub(cmd_args, 1, colon_pos - 1)
+            local timeout_str = sub(cmd_args, colon_pos + 1)
+            local timeout_sec = tonum(timeout_str)
+            if timeout_sec and timeout_sec > 0 then
+                test_framework.options.timeout_frames = timeout_sec * 60  -- Convert seconds to frames
+                test_framework.options.timeout_seconds = timeout_sec
+                test_log("Timeout set from command line: " .. timeout_sec .. "s (" .. test_framework.options.timeout_frames .. " frames)", "debug")
+            end
+        end
+    end
 
     -- Validate phase
-    if test_framework.phase and test_framework.phase ~= "" then
+    if test_framework.phase and test_framework.phase ~= "" and test_framework.phase ~= "timeout" then
         local valid_phase = false
         for _, phase in ipairs(test_framework.options.phases) do
             if phase == test_framework.phase then
@@ -64,6 +87,8 @@ end
 function test_complete()
     test_framework.completed = true
     test_log("Test completed successfully", "info")
+    -- Stop PICO-8 execution when test is complete
+    stop()
 end
 
 -- Get current frame count
@@ -71,13 +96,27 @@ function test_get_frame_count()
     return test_framework.frame_count
 end
 
+-- Get timeout in frames
+function test_get_timeout_frames()
+    return test_framework.options.timeout_frames
+end
+
+-- Get timeout in seconds (if set from command line)
+function test_get_timeout_seconds()
+    return test_framework.options.timeout_seconds
+end
+
 -- Increment frame counter (call this in _update60)
 function test_update_frame()
     test_framework.frame_count = test_framework.frame_count + 1
 
     -- Check for timeout
-    if test_framework.frame_count > test_framework.options.timeout_frames then
-        test_log("Test timed out after " .. test_framework.frame_count .. " frames", "error")
+    if test_framework.frame_count >= test_framework.options.timeout_frames then
+        local timeout_msg = "Test execution timed out after " .. test_framework.frame_count .. " frames"
+        if test_framework.options.timeout_seconds then
+            timeout_msg = timeout_msg .. " (" .. test_framework.options.timeout_seconds .. "s)"
+        end
+        test_log(timeout_msg, "error")
         test_complete()
     end
 end

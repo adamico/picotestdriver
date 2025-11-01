@@ -22,21 +22,24 @@ A comprehensive automated testing framework for PICO-8 cartridges, enabling deve
 
 ```bash
 # Clone or download the framework files
-git clone https://github.com/your-repo/pico8-test-framework.git
-cd pico8-test-framework
+git clone https://github.com/adamico/picotestdriver.git
+cd picotestdriver
 ```
 
 ### 2. Run the Example
 
 ```bash
-# Run all tests
+# Run all tests with default timeout (30s)
 ./run_test.sh
 
 # Run specific test phase
 ./run_test.sh movement_test
 
-# Run with custom timeout
+# Run with custom timeout (timeout is passed to PICO-8)
 ./run_test.sh collision_test 60
+
+# Run specific cartridge with phase and timeout
+./run_test.sh -c my_game.p8 tap_test 45
 ```
 
 ### 3. Integrate into Your Project
@@ -79,22 +82,36 @@ end
 #### Test Framework
 
 ```lua
+```lua
 -- Initialize the framework
 test_init(options)
+-- options: {
+--   phases = {"phase1", "phase2", ...},
+--   default_phase = "phase1",
+--   timeout_frames = 1800,  -- Optional: defaults to 30s
+--   debug_level = "info"    -- "none", "info", "debug"
+-- }
+-- Note: timeout_frames is automatically set from command line if provided
 
 -- Get current test phase
 local phase = test_get_phase()
+
+-- Get timeout values (useful for test logic)
+local timeout_frames = test_get_timeout_frames()
+local timeout_seconds = test_get_timeout_seconds()  -- May be nil
 
 -- Check if test is completed
 if test_is_completed() then
     -- Test finished
 end
 
--- Mark test as completed
+-- Mark test as completed (automatically calls stop())
 test_complete()
 
 -- Update frame counter (call in _update60)
+-- Automatically calls test_complete() when timeout is reached
 test_update_frame()
+```
 
 -- Logging
 test_log("Message", "info")  -- "info", "debug", "warn", "error"
@@ -202,20 +219,101 @@ function test_player_movement()
 end
 ```
 
+## 🏗️ Architecture
+
+### Shared Library Design
+
+The framework uses a **shared function library** to prevent code duplication and maintain consistency across components. This design ensures a single source of truth for common functionality.
+
+#### Component Overview
+
+```
+lib/picotestdriver/
+├── lib/
+│   └── test_functions.sh           # Shared library (single source of truth)
+├── run_test.sh                     # Production test runner
+├── run_test_testable.sh            # Testable version for unit tests
+├── test/
+│   ├── test_helper.sh              # Test utilities
+│   ├── test_integration.sh         # Integration tests
+│   └── test_runner.sh              # Test suite runner
+├── test_framework.lua              # PICO-8 test framework core
+└── test_utils.lua                  # PICO-8 test utilities
+```
+
+#### Shared Functions Library (`lib/test_functions.sh`)
+
+All shell components source this library to access common functionality:
+
+- **`build_command(cart_file, phase, timeout, verbose)`**: Constructs PICO-8 command with proper timeout format (`-p phase:timeout`)
+- **`parse_arguments(...)`**: Command-line argument parsing
+- **`validate_timeout(timeout)`**: Input validation
+- **Color functions**: Terminal output formatting
+- **Help/configuration display**: User-facing documentation
+
+**Sourcing Pattern:**
+```bash
+source "$LIB_DIR/test_functions.sh"
+```
+
+#### Timeout Parameter Flow
+
+The framework passes timeout values from the shell to PICO-8 using stat(6):
+
+1. **Shell Layer** (`run_test.sh`):
+   ```bash
+   build_command "test.p8" "tap_test" "30" "false"
+   # Generates: pico8 -run test.p8 -p tap_test:30
+   ```
+
+2. **PICO-8 Layer** (`test_framework.lua`):
+   ```lua
+   function test_init(phase)
+       local cmd = stat(6)  -- e.g., "tap_test:30"
+       local timeout = parse_timeout(cmd)  -- 30
+       timeout_frames = timeout * 60  -- 1800 frames
+   end
+   ```
+
+3. **Automatic Termination**:
+   ```lua
+   function test_update_frame()
+       if frame_count >= timeout_frames then
+           test_complete()  -- Calls stop()
+       end
+   end
+   ```
+
+#### Benefits of Shared Library Architecture
+
+- **Single Source of Truth**: Function signatures defined once, used everywhere
+- **Consistency**: All components use identical parameter passing and validation
+- **Maintainability**: Changes propagate automatically to all consumers
+- **Testability**: Unit tests use same functions as production code
+- **Type Safety**: Centralized validation prevents parameter mismatches
+
 ## 📁 Project Structure
 
 ```
 pico8-test-framework/
 ├── README.md                    # This file
-├── CHANGELOG.md                 # Project history and version notes
+├── CHANGELOG.md                 # Project history (auto-generated from commits)
 ├── LICENSE                      # MIT license
 ├── run_test.sh                 # Test runner script
+├── run_test_testable.sh        # Testable version for unit tests
+├── lib/
+│   ├── test_functions.sh        # Shared function library
+│   └── README.md                # Library documentation
+├── scripts/
+│   ├── generate_changelog.sh   # Automated changelog generator
+│   └── install_hooks.sh         # Git hooks installer
 ├── test_framework.lua          # Core framework
 ├── test_utils.lua              # Testing utilities
 ├── test_cart.p8               # Example cartridge
 ├── git-conventional-commits.yaml # Commit convention configuration
 ├── .git-hooks/                 # Custom git hooks directory
-│   └── commit-msg              # Commit message validation hook
+│   ├── commit-msg              # Commit message validation hook
+│   └── prepare-commit-msg      # Changelog update prompt
 ├── .vscode/                    # VS Code workspace settings
 │   └── settings.json           # PICO-8 development configuration
 ├── .github/                    # GitHub configuration
@@ -223,6 +321,11 @@ pico8-test-framework/
 ├── docs/                       # Documentation
 │   ├── integration_guide.md    # Integration tutorial
 │   └── development_notes.md    # Implementation details
+├── test/                       # Test suite
+│   ├── test_runner.sh          # Test suite executor
+│   ├── test_helper.sh          # Test utilities
+│   ├── test_integration.sh     # Integration tests
+│   └── README.md               # Test suite documentation
 └── examples/                   # Additional examples (future)
 ```
 
@@ -399,6 +502,26 @@ This project uses conventional commits. Please follow these commit types:
 - `chore:` - Miscellaneous tasks
 
 Example: `git commit -m "feat: add performance testing utilities"`
+
+### Changelog Management
+
+The project uses automated changelog generation from conventional commits:
+
+```bash
+# Install git hooks (includes commit-msg validation and changelog prompt)
+./scripts/install_hooks.sh
+
+# Generate changelog from commits
+./scripts/generate_changelog.sh
+
+# Generate from specific version
+./scripts/generate_changelog.sh v1.0.0
+
+# Generate between versions
+./scripts/generate_changelog.sh v1.0.0 v1.1.0
+```
+
+The `prepare-commit-msg` hook will automatically prompt you to update the changelog when making release-related commits.
 
 ### VS Code Configuration
 
