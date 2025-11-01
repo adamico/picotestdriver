@@ -114,7 +114,7 @@
 
 ---
 
-**About this project:** PICO-8 Automated Testing Framework - Developed as part of the [obsi](https://github.com/adamico/obsi) PICO-8 game project. See [docs/development_notes.md](docs/development_notes.md) for roadmap and design decisions.
+**About this project:** PICO-8 Automated Testing Framework. See [docs/development_notes.md](docs/development_notes.md) for roadmap and design decisions.
 
 **Format:** This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
