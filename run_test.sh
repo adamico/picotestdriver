@@ -185,12 +185,12 @@ handle_list_subtests() {
 
         while IFS= read -r subtest; do
             if [ -n "$subtest" ]; then
-                echo "  $subtest - Test subtest"
+                echo "  $subtest"
             fi
         done <<< "$unique_subtests"
     else
         print_color $YELLOW "No local subtests table found in cartridge or included files."
-        echo "  all - Run all tests"
+        echo "  all"
         echo ""
         print_color $YELLOW "Make sure your test file includes: local subtests = { { name = \"test_name\", ... }, ... }"
     fi
