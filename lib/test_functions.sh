@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
-
 # PicoTestDriver - Shared Functions Library
 # This file contains shared functions used across the test framework
 # Source this file to avoid code duplication and desync issues

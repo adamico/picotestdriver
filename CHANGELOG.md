@@ -16,9 +16,6 @@
 - refactor: remove bundled changelog scripts (now in git-changelog-automation)
 - refactor: remove changelog automation files (extracted to standalone library)
 
-### Performance
-- None yet
-- None yet
 
 ### Documentation
 - Added contribution guidelines
