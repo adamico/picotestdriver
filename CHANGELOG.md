@@ -20,50 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Performance Improvements
 - None
 
-## [1.0.1] - 2025-10-31
+## [Unreleased]
 
 ### Features
-- Git conventional commits configuration with validation hook
-- VS Code settings optimized for PICO-8 development
-- Copilot instructions for AI-assisted development
-- Comprehensive development workflow documentation
+- add shared functions library for code consistency
+- enhance --list option to check included .lua files and update docs
+- add -c/--cart option to specify test cartridge file
+- add comprehensive GitHub repository enhancements
 
-### Documentation
-- Added `.git-hooks/commit-msg` for commit message validation
-- Created `git-conventional-commits.yaml` with commit type definitions
-- Added `.vscode/settings.json` for PICO-8 IDE integration
-- Created `.github/copilot-instructions.md` for AI assistant guidance
-
-## [1.0.0] - 2025-10-31
-
-### Features
-- Core test framework with parameter parsing, phase management, and logging
-- Rich assertion library (`test_assert`, `test_assert_equal`, `test_assert_in_range`, etc.)
-- Input simulation utilities (`test_press_button`, `test_release_button`)
-- Performance measurement tools (`test_measure_performance`)
-- Command-line test runner (`run_test.sh`) with timeout support
-- Phase-based test organization for isolated testing
-- Function override system for runtime debugging
-- Frame-accurate test timing (60 FPS)
-- Cross-platform Bash script integration
-- Example cartridge demonstrating framework features
-
-### Documentation
-- Comprehensive README with quick start guide
-- Integration guide for adding framework to existing projects
-- Development notes capturing design decisions and patterns
-- API reference for all framework functions
-- Test suite documentation
-
-### Technical Implementation
-- PICO-8 compatible Lua (works within platform limitations)
-- Command-line parameter passing via `stat(6)`
-- Structured logging with configurable verbosity levels
-- Modular architecture to manage token limits
-- Robust error reporting without exception handling
-
----
-
+### Bug Fixes
+- cart metadata
 ## Project Context
 
 This framework was developed as part of the **obsi** PICO-8 game project, where complex boundary mechanics and physics required sophisticated testing capabilities. The framework evolved from manual testing to automated command-line execution, then was extracted into a reusable community tool.

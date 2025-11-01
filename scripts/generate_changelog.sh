@@ -61,38 +61,81 @@ generate_changelog() {
     local from_ref=$1
     local to_ref=${2:-HEAD}
     
-    print_color "$BLUE" "Generating changelog..."
+    print_color "$BLUE" "Generating changelog..." >&2
     
     if [ -z "$from_ref" ]; then
         from_ref=$(get_latest_tag)
         if [ -z "$from_ref" ]; then
-            print_color "$YELLOW" "No tags found. Generating changelog from first commit..."
-            from_ref=$(git rev-list --max-parents=0 HEAD)
+            print_color "$YELLOW" "No tags found. Generating changelog from all commits..." >&2
+            from_ref=""
         else
-            print_color "$GREEN" "Using latest tag: $from_ref"
+            print_color "$GREEN" "Using latest tag: $from_ref" >&2
         fi
     fi
     
-    print_color "$BLUE" "Changelog range: $from_ref...$to_ref"
-    
-    # Generate changelog using git-conventional-commits
-    local temp_file=$(mktemp)
-    
-    if npx git-conventional-commits changelog --from="$from_ref" --to="$to_ref" > "$temp_file" 2>&1; then
-        if [ -s "$temp_file" ]; then
-            echo "$temp_file"
-            return 0
-        else
-            print_color "$YELLOW" "No conventional commits found in range $from_ref...$to_ref"
-            rm "$temp_file"
-            return 1
-        fi
+    if [ -n "$from_ref" ]; then
+        print_color "$BLUE" "Changelog range: $from_ref...$to_ref" >&2
     else
-        print_color "$RED" "Error generating changelog:"
-        cat "$temp_file"
+        print_color "$BLUE" "Generating changelog from all commits to $to_ref" >&2
+    fi
+    
+    # Generate changelog using git log parsing
+    local temp_file
+    temp_file=$(mktemp)
+    
+    print_color "$BLUE" "Parsing commits for conventional format..." >&2
+    
+    local git_range
+    if [ -n "$from_ref" ]; then
+        git_range="$from_ref..$to_ref"
+    else
+        git_range="$to_ref"
+    fi
+    
+    # Extract conventional commits
+    local feat_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^feat:" || true)
+    local fix_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^fix:" || true)
+    local perf_commits=$(git log --pretty=format:"%s" "$git_range" | grep -E "^perf:" || true)
+    
+    if [ -z "$feat_commits" ] && [ -z "$fix_commits" ] && [ -z "$perf_commits" ]; then
+        print_color "$YELLOW" "No conventional commits (feat, fix, perf) found in range"
         rm "$temp_file"
         return 1
     fi
+    
+    # Generate simple changelog
+    {
+        echo "## [Unreleased]"
+        echo ""
+        
+        if [ -n "$feat_commits" ]; then
+            echo "### Features"
+            echo "$feat_commits" | while read -r line; do
+                # Remove "feat: " prefix
+                echo "- ${line#feat: }"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$fix_commits" ]; then
+            echo "### Bug Fixes"
+            echo "$fix_commits" | while read -r line; do
+                echo "- ${line#fix: }"
+            done
+            echo ""
+        fi
+        
+        if [ -n "$perf_commits" ]; then
+            echo "### Performance Improvements"
+            echo "$perf_commits" | while read -r line; do
+                echo "- ${line#perf: }"
+            done
+            echo ""
+        fi
+    } > "$temp_file"
+    
+    echo "$temp_file"
+    return 0
 }
 
 # Update CHANGELOG.md
