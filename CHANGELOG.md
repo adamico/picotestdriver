@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.0] - 2025-11-01
+
+
+### Features
+- add unified `ptd` command with subcommand architecture (ptd test, ptd generate)
+- improve command-line interface with clearer help text and examples
+- add exit codes for better automation and CI/CD integration
+- maintain backward compatibility with run_test.sh and generate_test.sh
+
+
 ## [1.3.0] - 2025-11-01
 
 

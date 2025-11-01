@@ -1,6 +1,6 @@
-# PICO-8 Automated Testing Framework
+# PicoTestDriver
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/your-repo/pico8-test-framework)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/adamico/picotestdriver)
 [![PICO-8](https://img.shields.io/badge/PICO--8-0.2.5+-red.svg)](https://www.lexaloffle.com/pico-8.php)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -9,14 +9,28 @@ A comprehensive automated testing framework for PICO-8 cartridges, enabling deve
 ## ✨ Features
 
 - **Automated Testing**: Run tests programmatically with detailed logging
-- **Command-Line Integration**: Execute specific test phases via script parameters
+- **Command-Line Integration**: Execute specific test subtests via script parameters
+- **Test Generation**: Generate test files with boilerplate code in seconds
 - **Debug Output**: Comprehensive logging with multiple verbosity levels
 - **Assertion Library**: Rich set of assertions for validating game behavior
 - **Performance Testing**: Measure frame rates and performance metrics
 - **Easy Integration**: Drop-in framework for existing PICO-8 projects
 - **Cross-Platform**: Works on Linux, macOS, and Windows (via WSL)
 
-## 🚀 Quick Start
+## � Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Documentation](#-documentation)
+  - [Core API](#core-api)
+  - [Command Line Usage](#command-line-usage)
+- [Examples](#-examples)
+- [Testing Your Tests](#-testing-your-tests)
+- [Best Practices](#-best-practices)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## �🚀 Quick Start
 
 ### 1. Download the Framework
 
@@ -26,44 +40,57 @@ git clone https://github.com/adamico/picotestdriver.git
 cd picotestdriver
 ```
 
-### 2. Run the Example
+### 2. Run the Demo
 
 ```bash
-# Run all tests with default timeout (30s)
-./run_test.sh
+# Run the demo test cartridge
+./ptd test -d
 
-# Run specific test phase
-./run_test.sh movement_test
+# List available test subtests
+./ptd test -d --list
 
-# Run with custom timeout (timeout is passed to PICO-8)
-./run_test.sh collision_test 60
-
-# Run specific cartridge with phase and timeout
-./run_test.sh -c my_game.p8 tap_test 45
+# Run a specific subtest
+./ptd test -d movement
 ```
 
-### 3. Generate Test Files (New!)
+### 3. Generate Your Test Files
 
-Use the test file generator to create boilerplate:
+Create test files for your project with one command:
 
 ```bash
-# Generate test files with defaults
-./generate_test.sh -d tests -n my_game_test
+# Generate test files in a tests directory
+./ptd generate -d tests -n my_game
 
 # Generate with custom subtests and timeout
-./generate_test.sh -d tests -n my_game_test \
+./ptd generate -d tests -n my_game \
   -s "player,enemy,bullet,collision" \
   -t 60
 
 # See all options
-./generate_test.sh --help
+./ptd help generate
 ```
 
 This creates:
-- `tests/my_game_test.p8` - Cartridge with #include statements
-- `tests/my_game_test.lua` - Test file with subtest boilerplate
+- `tests/my_game.p8` - Cartridge with #include statements
+- `tests/my_game.lua` - Test file with subtest boilerplate
 
-### 4. Integrate into Your Project (Manual)
+### 4. Run Your Tests
+
+```bash
+# Run all tests in your cartridge
+./ptd test -c tests/my_game.p8
+
+# Run a specific subtest
+./ptd test -c tests/my_game.p8 player
+
+# Run with custom timeout (60 seconds)
+./ptd test -c tests/my_game.p8 collision 60
+
+# List all available subtests
+./ptd test -c tests/my_game.p8 --list
+```
+
+### 5. Manual Integration (Alternative)
 
 Or add these lines to your cartridge manually:
 
@@ -166,32 +193,94 @@ local result = test_measure_performance(my_function, 100, "My Function")
 
 ### Command Line Usage
 
+The `ptd` command provides two main subcommands:
+
+#### ptd test - Run Tests
+
 ```bash
-# Basic usage
-./run_test.sh
+# Basic usage - run the demo
+./ptd test -d
 
-# Run specific phase
-./run_test.sh movement_test
+# Run tests from your cartridge
+./ptd test -c my_test.p8
 
-# Custom timeout
-./run_test.sh combat_test 120
+# Run specific subtest
+./ptd test -c my_test.p8 movement
 
-# List available test phases
-./run_test.sh --list
-./run_test.sh -l -c my_test.p8
+# Custom timeout (in seconds)
+./ptd test -c my_test.p8 combat 120
+
+# List available test subtests
+./ptd test -c my_test.p8 --list
 
 # Help and options
-./run_test.sh --help
-./run_test.sh --verbose
+./ptd test --help
+./ptd test -c my_test.p8 --verbose
 ```
 
-#### Command Line Options
+#### ptd generate - Generate Test Files
+
+```bash
+# Generate test files in current directory
+./ptd generate -n my_test
+
+# Generate in specific directory
+./ptd generate -d tests -n my_game
+
+# Custom subtests and timeout
+./ptd generate -n my_test \
+  -s "player,enemy,bullet,collision" \
+  -t 60
+
+# Custom framework path
+./ptd generate -n my_test \
+  --framework-path ./lib/test_framework.lua
+
+# Help and options
+./ptd help generate
+```
+
+#### Backward Compatibility
+
+The old `run_test.sh` and `generate_test.sh` scripts are still available for backward compatibility:
+
+```bash
+# Old style (still works)
+./run_test.sh -c my_test.p8
+./generate_test.sh -d tests -n my_game
+
+# New style (recommended)
+./ptd test -c my_test.p8
+./ptd generate -d tests -n my_game
+```
+
+#### Exit Codes
+
+PicoTestDriver returns standard exit codes for automation and CI/CD integration:
+
+- **`0`**: Success - tests completed normally
+- **`1`**: Invalid arguments provided
+- **`2`**: PICO-8 not found in PATH
+- **`3`**: Test cartridge file not found
+- **`124`**: Timeout reached during test execution
+
+#### Command Line Options (ptd test)
 
 - **`-h, --help`**: Display help information and usage examples
 - **`-v, --version`**: Show the framework version
 - **`-c, --cart FILE`**: Specify the test cartridge file (default: `test_cart.p8`)
-- **`-l, --list`**: List all available test phases defined in the cartridge and included files
+- **`-d, --demo`**: Run the demo test cartridge
+- **`-l, --list`**: List all available test subtests defined in the cartridge
 - **`--verbose`**: Enable detailed output during test execution
+
+#### Command Line Options (ptd generate)
+
+- **`-h, --help`**: Display help information
+- **`-d, --dir DIR`**: Output directory (default: current directory)
+- **`-n, --name NAME`**: Test file base name (default: `test`)
+- **`-s, --subtests LIST`**: Comma-separated list of subtest names (default: `movement,collision,input,boundary`)
+- **`-t, --timeout SECONDS`**: Default timeout in seconds (default: `30`)
+- **`--framework-path PATH`**: Path to test_framework.lua (default: `../lib/picotestdriver/test_framework.lua`)
 
 #### The --list Option
 
