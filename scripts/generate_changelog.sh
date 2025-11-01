@@ -186,6 +186,14 @@ update_changelog() {
 
 # Interactive mode
 interactive_update() {
+    local auto_accept=$1
+    
+    if [ "$auto_accept" = "true" ]; then
+        print_color "$GREEN" "Auto-accepting changes (non-interactive mode)"
+        rm "$CHANGELOG_BACKUP"
+        return 0
+    fi
+    
     print_color "$YELLOW" "Generated changelog entries. Review the changes:"
     echo ""
     git diff --no-index "$CHANGELOG_BACKUP" "$CHANGELOG_FILE" || true
@@ -207,8 +215,31 @@ interactive_update() {
 
 # Main
 main() {
-    local from_ref=$1
-    local to_ref=$2
+    local from_ref=""
+    local to_ref=""
+    local auto_accept="false"
+    
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --non-interactive|--auto-accept|-y)
+                auto_accept="true"
+                shift
+                ;;
+            --help|-h)
+                show_help
+                exit 0
+                ;;
+            *)
+                if [ -z "$from_ref" ]; then
+                    from_ref=$1
+                elif [ -z "$to_ref" ]; then
+                    to_ref=$1
+                fi
+                shift
+                ;;
+        esac
+    done
     
     print_color "$BLUE" "=== Changelog Generator ==="
     echo ""
@@ -224,7 +255,7 @@ main() {
         
         # Interactive review
         if [ -f "$CHANGELOG_BACKUP" ]; then
-            interactive_update
+            interactive_update "$auto_accept"
         else
             print_color "$GREEN" "Changelog created successfully!"
         fi
@@ -240,20 +271,26 @@ show_help() {
 Changelog Generator
 
 Usage:
-  $0 [from_tag] [to_tag]
+  $0 [OPTIONS] [from_tag] [to_tag]
   $0 --help
 
 Examples:
-  $0                    # Generate from last tag to HEAD
-  $0 v1.0.0             # Generate from v1.0.0 to HEAD
-  $0 v1.0.0 v1.1.0      # Generate from v1.0.0 to v1.1.0
+  $0                           # Generate from last tag to HEAD
+  $0 v1.0.0                    # Generate from v1.0.0 to HEAD
+  $0 v1.0.0 v1.1.0             # Generate from v1.0.0 to v1.1.0
+  $0 --auto-accept v1.0.0      # Generate and auto-accept (no prompt)
+  $0 -y                        # Generate from last tag, auto-accept
 
 Options:
-  --help    Show this help message
+  --non-interactive, --auto-accept, -y
+                    Auto-accept changes without prompting (useful for AI agents/CI)
+  --help, -h        Show this help message
 
-This script uses git-conventional-commits to generate changelog entries
-from conventional commit messages. It will automatically update the
-CHANGELOG.md file while preserving manual entries in [Unreleased].
+This script parses git log to generate changelog entries from conventional
+commit messages (feat, fix, perf). It updates CHANGELOG.md while preserving
+manual entries in [Unreleased].
+
+For AI agents and automated workflows, use --auto-accept to skip interactive prompts.
 
 EOF
 }

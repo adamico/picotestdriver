@@ -34,6 +34,7 @@ if echo "$commit_msg" | grep -qiE '^(build|release|chore):.*(version|release|v[0
     echo ""
     echo "You can run:"
     echo "  ./scripts/generate_changelog.sh"
+    echo "  ./scripts/generate_changelog.sh --auto-accept  # For AI agents/CI"
     echo ""
     echo "Or update CHANGELOG.md manually, then:"
     echo "  git add CHANGELOG.md"

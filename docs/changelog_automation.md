@@ -31,7 +31,7 @@ npm install --save-dev git-conventional-commits
 ### Manual Changelog Generation
 
 ```bash
-# Generate from last tag to HEAD
+# Generate from last tag to HEAD (interactive)
 ./scripts/generate_changelog.sh
 
 # Generate from specific version
@@ -39,6 +39,11 @@ npm install --save-dev git-conventional-commits
 
 # Generate between versions
 ./scripts/generate_changelog.sh v1.0.0 v1.1.0
+
+# Auto-accept without prompts (for AI agents/CI)
+./scripts/generate_changelog.sh --auto-accept
+./scripts/generate_changelog.sh -y
+./scripts/generate_changelog.sh --non-interactive v1.0.0
 ```
 
 ### Automatic Prompts
@@ -123,6 +128,23 @@ git commit -m "build: bump version to 1.1.0"
 git tag v1.1.0
 git push origin main --tags
 ```
+
+### For AI Agents and CI/CD
+
+Use the `--auto-accept` flag to skip interactive prompts:
+
+```bash
+# AI agent making a release commit
+git add .
+git commit -m "build: release version 1.2.0"
+./scripts/generate_changelog.sh --auto-accept
+git add CHANGELOG.md
+git commit --amend --no-edit
+git tag v1.2.0
+git push origin main --tags
+```
+
+This allows automated tools to update the changelog without requiring human interaction.
 
 ## CHANGELOG.md Format
 

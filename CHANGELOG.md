@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Features
+- implement working changelog automation with git log parsing
 - add shared functions library for code consistency
 - enhance --list option to check included .lua files and update docs
 - add -c/--cart option to specify test cartridge file

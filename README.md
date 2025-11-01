@@ -511,7 +511,7 @@ The project uses automated changelog generation from conventional commits:
 # Install git hooks (includes commit-msg validation and changelog prompt)
 ./scripts/install_hooks.sh
 
-# Generate changelog from commits
+# Generate changelog from commits (interactive)
 ./scripts/generate_changelog.sh
 
 # Generate from specific version
@@ -519,9 +519,13 @@ The project uses automated changelog generation from conventional commits:
 
 # Generate between versions
 ./scripts/generate_changelog.sh v1.0.0 v1.1.0
+
+# Auto-accept for AI agents/CI (non-interactive)
+./scripts/generate_changelog.sh --auto-accept
+./scripts/generate_changelog.sh -y v1.0.0
 ```
 
-The `prepare-commit-msg` hook will automatically prompt you to update the changelog when making release-related commits.
+The `prepare-commit-msg` hook will automatically prompt you to update the changelog when making release-related commits. Use `--auto-accept` for automated workflows and AI agents.
 
 ### VS Code Configuration
 
