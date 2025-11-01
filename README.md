@@ -388,16 +388,11 @@ picotestdriver/
 │   ├── test_functions.sh           # Shared function library (for tests)
 │   └── README.md                   # Library documentation
 ├── scripts/
-│   ├── generate_changelog.sh      # Automated changelog generator
-│   └── install_hooks.sh            # Git hooks installer
+│   └── README.md                   # Scripts documentation
 ├── test_framework.lua             # Core testing framework
 ├── test_utils.lua                 # Testing utilities
 ├── main.lua                       # Demo test implementation
 ├── test_cart.p8                  # Demo cartridge
-├── git-conventional-commits.yaml  # Commit convention config
-├── .git-hooks/                    # Custom git hooks
-│   ├── commit-msg                 # Commit message validation
-│   └── prepare-commit-msg         # Changelog prompt
 ├── .vscode/                       # VS Code settings
 │   └── settings.json              # PICO-8 configuration
 ├── .github/                       # GitHub configuration
@@ -405,7 +400,7 @@ picotestdriver/
 ├── docs/                          # Documentation
 │   ├── integration_guide.md       # Integration tutorial
 │   ├── development_notes.md       # Implementation details
-│   ├── changelog_automation.md    # Changelog guide
+│   ├── changelog_automation.md    # Changelog guide (see git-changelog-automation)
 │   ├── ai_agent_workflow.md       # AI agent/CI guide
 │   └── todo.md                    # Project roadmap
 └── test/                          # Test suite (118 tests)

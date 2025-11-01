@@ -4,7 +4,19 @@
 
 ### Changed
 - refactor: extract changelog automation to standalone library (git-changelog-automation)
+- refactor: remove bundled changelog scripts (now in git-changelog-automation)
+
+### Removed
+- scripts/generate_changelog.sh (moved to git-changelog-automation)
+- scripts/test_generate_changelog.sh (moved to git-changelog-automation)
+- scripts/test_changelog_new_format.sh (moved to git-changelog-automation)
+- scripts/install_hooks.sh (functionality in git-changelog-automation)
+- .git-hooks/ directory (git hooks now in git-changelog-automation)
+- git-conventional-commits.yaml (example config in git-changelog-automation)
+
+### Documentation
 - docs: add reference to git-changelog-automation for changelog generation
+- docs: create docs/changelog-automation.md with migration guide
 
 ## [2.0.2] - 2025-11-01
 
