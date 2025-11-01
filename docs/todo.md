@@ -18,7 +18,7 @@
 
 ## improvements
 - [ ] add color to the ptd command output
-- [ ] test_utils.lua: add a test_log_cpu_usage function using stat(1) (see https://www.lexaloffle.com/dl/docs/pico-8_manual.html#STAT), document this addition in the main README file
+- [x] test_utils.lua: add a test_log_cpu_usage function using stat(1) (see https://www.lexaloffle.com/dl/docs/pico-8_manual.html#STAT), document this addition in the main README file
 
 
 ## new features
