@@ -1,21 +1,48 @@
 -- PicoTestDriver Test Utilities
 -- Helper functions for common testing patterns
 
--- Input simulation helpers
--- Simulate button press (call once per frame for hold)
-function test_press_button(btn)
-    -- In PICO-8, btn() reads current button state
-    -- This is a helper for documentation - actual implementation depends on game
-    test_log("Simulating button press: " .. btn, "debug")
+-- Input simulation utilities
+-- PICO-8's btn() function reads hardware state directly, so we can't override it.
+-- Instead, provide utilities to help create testable input systems.
+
+-- Button state tracker for custom input systems
+local btn_state_override = {}
+
+function test_set_button_state(button, pressed)
+    -- Store button state for games that use custom input wrappers
+    -- Usage in game code:
+    --   function my_btn(b)
+    --       if test_get_button_state then
+    --           local override = test_get_button_state(b)
+    --           if override ~= nil then return override end
+    --       end
+    --       return btn(b)
+    --   end
+    btn_state_override[button] = pressed and true or false
+    test_log("Button " .. button .. " " .. (pressed and "pressed" or "released"), "debug")
 end
 
-function test_release_button(btn)
-    test_log("Simulating button release: " .. btn, "debug")
+function test_get_button_state(button)
+    -- Games can query this to get overridden button state
+    -- Returns nil if no override set (use real btn())
+    return btn_state_override[button]
 end
 
-function test_hold_button(btn, frames)
-    test_log("Simulating button hold: " .. btn .. " for " .. frames .. " frames", "debug")
+function test_clear_button_states()
+    -- Clear all button state overrides
+    btn_state_override = {}
 end
+
+-- Example: Simulating a button sequence
+-- function test_simulate_button_sequence(button, press_frames, release_frames)
+--     test_set_button_state(button, true)
+--     test_wait_frames(press_frames, function()
+--         test_set_button_state(button, false)
+--         test_wait_frames(release_frames, function()
+--             test_log("Button sequence complete", "debug")
+--         end)
+--     end)
+-- end
 
 -- Frame-based waiting (cooperative with main loop)
 local wait_frames_remaining = 0
@@ -226,9 +253,9 @@ function test_print_results()
 end
 
 -- Export functions (global in PICO-8)
-test_press_button = test_press_button
-test_release_button = test_release_button
-test_hold_button = test_hold_button
+test_set_button_state = test_set_button_state
+test_get_button_state = test_get_button_state
+test_clear_button_states = test_clear_button_states
 test_wait_frames = test_wait_frames
 test_update_wait = test_update_wait
 test_assert = test_assert
