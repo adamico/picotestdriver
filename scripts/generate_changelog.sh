@@ -26,7 +26,7 @@ NC='\033[0m' # No Color
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-CHANGELOG_FILE="$PROJECT_DIR/CHANGELOG.md"
+CHANGELOG_FILE="${CHANGELOG_FILE:-$PROJECT_DIR/CHANGELOG.md}"
 CHANGELOG_BACKUP="$CHANGELOG_FILE.backup"
 CONFIG_FILE="$PROJECT_DIR/git-conventional-commits.yaml"
 
@@ -273,11 +273,101 @@ interactive_update() {
     fi
 }
 
+# Release [Unreleased] to a version
+release_version() {
+    local version=$1
+    local release_date=${2:-$(date +%Y-%m-%d)}
+    
+    if [ -z "$version" ]; then
+        print_color "$RED" "Error: Version number required for release" >&2
+        echo "Usage: $0 --release VERSION [DATE]" >&2
+        return 1
+    fi
+    
+    # Validate version format (basic semver check)
+    if ! echo "$version" | grep -qE '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+        print_color "$RED" "Error: Invalid version format. Use semver (e.g., 1.2.3 or v1.2.3)" >&2
+        return 1
+    fi
+    
+    # Remove 'v' prefix if present
+    version="${version#v}"
+    
+    print_color "$BLUE" "Releasing [Unreleased] as version $version ($release_date)..." >&2
+    
+    # Check if [Unreleased] has content
+    local unreleased_content=$(sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | grep "^- " | grep -v "None yet" || true)
+    
+    if [ -z "$unreleased_content" ]; then
+        print_color "$YELLOW" "Warning: [Unreleased] section has no content to release" >&2
+        if [ "$auto_accept" != "true" ]; then
+            read -p "Continue anyway? (y/n): " -n 1 -r >&2
+            echo "" >&2
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                return 1
+            fi
+        else
+            print_color "$GREEN" "Auto-accepting empty [Unreleased] (non-interactive mode)" >&2
+        fi
+    fi
+    
+    # Backup
+    cp "$CHANGELOG_FILE" "$CHANGELOG_BACKUP"
+    print_color "$GREEN" "Created backup: $CHANGELOG_BACKUP" >&2
+    
+    # Create temp file with new structure
+    {
+        # Header
+        echo "# Changelog"
+        echo ""
+        echo "All notable changes to this project will be documented in this file."
+        echo ""
+        echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),"
+        echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
+        echo ""
+        
+        # New empty [Unreleased]
+        echo "## [Unreleased]"
+        echo ""
+        echo "### Features"
+        echo "- None yet"
+        echo ""
+        echo "### Bug Fixes"
+        echo "- None yet"
+        echo ""
+        echo "### Performance Improvements"
+        echo "- None yet"
+        echo ""
+        
+        # Convert old [Unreleased] to new version
+        echo "## [$version] - $release_date"
+        echo ""
+        sed -n '/## \[Unreleased\]/,/^## \[/p' "$CHANGELOG_FILE" | \
+            sed '1d;$d' | \
+            sed '/^## \[Unreleased\]/d'
+        echo ""
+        
+        # Append all existing version sections
+        sed -n '/^## \[[0-9]/,/^---/p' "$CHANGELOG_FILE" | sed '/^---/d'
+        
+        # Append footer
+        sed -n '/^---/,$p' "$CHANGELOG_FILE"
+    } > "$CHANGELOG_FILE.new"
+    
+    mv "$CHANGELOG_FILE.new" "$CHANGELOG_FILE"
+    print_color "$GREEN" "Released [Unreleased] as [$version]" >&2
+    
+    return 0
+}
+
 # Main
 main() {
     local from_ref=""
     local to_ref=""
     local auto_accept="false"
+    local release_mode="false"
+    local release_version=""
+    local release_date=""
     
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -285,6 +375,19 @@ main() {
             --non-interactive|--auto-accept|-y)
                 auto_accept="true"
                 shift
+                ;;
+            --release|-r)
+                release_mode="true"
+                shift
+                if [[ $# -gt 0 ]] && [[ ! "$1" =~ ^- ]]; then
+                    release_version=$1
+                    shift
+                    # Optional date parameter
+                    if [[ $# -gt 0 ]] && [[ ! "$1" =~ ^- ]]; then
+                        release_date=$1
+                        shift
+                    fi
+                fi
                 ;;
             --help|-h)
                 show_help
@@ -303,6 +406,30 @@ main() {
     
     print_color "$BLUE" "=== Changelog Generator ==="
     echo ""
+    
+    # Handle release mode
+    if [ "$release_mode" = "true" ]; then
+        if [ -z "$release_version" ]; then
+            print_color "$RED" "Error: --release requires a version number"
+            echo ""
+            echo "Usage: $0 --release VERSION [DATE]"
+            echo "Example: $0 --release 1.2.0"
+            echo "Example: $0 --release v1.2.0 2025-11-01"
+            return 1
+        fi
+        
+        if release_version "$release_version" "$release_date"; then
+            if [ "$auto_accept" = "true" ]; then
+                print_color "$GREEN" "Release completed (auto-accepted)"
+                rm -f "$CHANGELOG_BACKUP"
+            else
+                interactive_update "$auto_accept"
+            fi
+        else
+            return 1
+        fi
+        return 0
+    fi
     
     # Check dependencies
     check_dependencies
@@ -332,6 +459,7 @@ Changelog Generator
 
 Usage:
   $0 [OPTIONS] [from_tag] [to_tag]
+  $0 --release VERSION [DATE]
   $0 --help
 
 Examples:
@@ -340,10 +468,17 @@ Examples:
   $0 v1.0.0 v1.1.0             # Generate from v1.0.0 to v1.1.0
   $0 --auto-accept v1.0.0      # Generate and auto-accept (no prompt)
   $0 -y                        # Generate from last tag, auto-accept
+  
+  $0 --release 1.2.0           # Convert [Unreleased] to [1.2.0] with today's date
+  $0 --release v1.2.0 2025-11-01  # Convert with specific date
+  $0 -r 1.2.0 -y               # Release and auto-accept
 
 Options:
   --non-interactive, --auto-accept, -y
                     Auto-accept changes without prompting (useful for AI agents/CI)
+  --release VERSION [DATE], -r VERSION [DATE]
+                    Convert [Unreleased] section to a version release
+                    DATE defaults to today if not specified
   --help, -h        Show this help message
 
 This script parses git log to generate changelog entries from conventional
@@ -351,6 +486,10 @@ commit messages (feat, fix, perf). It updates CHANGELOG.md while preserving
 manual entries in [Unreleased].
 
 For AI agents and automated workflows, use --auto-accept to skip interactive prompts.
+
+Release Mode:
+  Use --release to prepare a new version release. This converts the [Unreleased]
+  section to a versioned section and creates a new empty [Unreleased] at the top.
 
 EOF
 }

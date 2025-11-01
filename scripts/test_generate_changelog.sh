@@ -300,6 +300,51 @@ test_sorted_output() {
     assert_contains "$first_line" "alpha" "First line after sort contains 'alpha'"
 }
 
+# Test 11: Release functionality
+test_release_functionality() {
+    print_color "$YELLOW" "Test: --release converts [Unreleased] to version"
+    
+    # Create test changelog with [Unreleased] content
+    local test_changelog=$(mktemp)
+    cat > "$test_changelog" << 'EOF'
+# Changelog
+
+## [Unreleased]
+
+### Features
+- New feature A
+
+### Bug Fixes
+- Fixed bug B
+
+## [1.0.0] - 2024-01-01
+EOF
+    
+    # Run release with auto-accept
+    local output=$(CHANGELOG_FILE="$test_changelog" "$GENERATE_SCRIPT" --release 1.1.0 --auto-accept 2>&1)
+    local result=$?
+    
+    # Check success
+    assert_equals "0" "$result" "Release command succeeded"
+    
+    # Verify new [Unreleased] created
+    assert_contains "$(cat "$test_changelog")" "## [Unreleased]" "New [Unreleased] section created"
+    
+    # Verify version section created
+    assert_contains "$(cat "$test_changelog")" "## [1.1.0]" "Version section created"
+    
+    # Verify content moved to version
+    local version_section=$(sed -n '/## \[1\.1\.0\]/,/## \[1\.0\.0\]/p' "$test_changelog")
+    assert_contains "$version_section" "New feature A" "Features moved to version"
+    assert_contains "$version_section" "Fixed bug B" "Bug fixes moved to version"
+    
+    # Verify old version preserved
+    assert_contains "$(cat "$test_changelog")" "## [1.0.0] - 2024-01-01" "Old version preserved"
+    
+    # Cleanup
+    rm -f "$test_changelog"
+}
+
 # Main test runner
 main() {
     print_color "$YELLOW" "=== Changelog Generation Script Tests ==="
@@ -322,6 +367,7 @@ main() {
     test_empty_merge
     test_multiple_commits
     test_sorted_output
+    test_release_functionality
     
     # Summary
     echo ""
