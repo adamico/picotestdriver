@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- feat: add cart_name option to prevent export file overwriting
+
 ## [3.1.0] - 2025-11-02
 
 ### Added
