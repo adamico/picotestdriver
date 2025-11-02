@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.2.0] - 2025-11-02
+
+### Added
+- feat: add cart_name option to prevent export file overwriting
+- feat: add structured result export (JSON/CSV/Markdown)
+- feat: implement result export (JSON/CSV/Markdown)
+
+### Documentation
+- docs: updated todo
+- docs: update CHANGELOG with cart_name feature
+- docs: update todo list
+- docs: reorganize todo list with priority categories
+
+### Chores
+- chore: release version v3.1.0
+
 ## [3.1.0] - 2025-11-02
 
 ### Added
