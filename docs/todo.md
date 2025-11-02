@@ -9,7 +9,6 @@
 ### 4:refactor
 ### 5:docs
 ### 6:chore
-- [ ] commit last changes
 - [ ] release new version with changelog tool
 
 
