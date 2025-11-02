@@ -169,11 +169,14 @@ test_init(options)
 --   default_subtest = "test1",
 --   timeout_frames = nil,      -- Optional: manual override (auto-calculated if omitted)
 --   timeout_buffer = 180,      -- Optional: buffer for auto-calculation (default: 3s)
---   debug_level = "info"       -- "none", "info", "debug"
+--   debug_level = "info",      -- "none", "info", "debug"
+--   log_file = nil,            -- Optional: filename for log output (e.g., "test.log")
+--   cart_name = "test_cart"    -- Optional: prefix for export files (default: "test_cart")
 -- }
 -- Note: 
 -- - If subtests have durations and timeout_frames is not set, timeout is auto-calculated
 -- - timeout_frames can be overridden from command line (subtest:timeout format)
+-- - cart_name prefixes all export filenames to prevent overwriting between test suites
 
 -- Get current test phase
 local phase = test_get_phase()
@@ -402,6 +405,12 @@ Use the `FOLDER` command in PICO-8 to open the carts directory.
 Use `test_record_result()` to track test results, then export them in structured formats:
 
 ```lua
+-- Configure cart name for export file prefixing
+test_init({
+    subtests = {"movement", "collision"},
+    cart_name = "my_game"  -- Prefixes all export files (default: "test_cart")
+})
+
 -- Track test results
 test_reset_results()  -- Clear previous results
 test_record_result(true, "test_movement", nil)  -- Pass
@@ -411,10 +420,15 @@ test_record_result(false, "test_collision", "Player not detected")  -- Fail
 test_print_results()
 
 -- Export to files (at end of tests)
-test_export_json("results.json")      -- Machine-readable for CI/CD
-test_export_csv("results.csv")        -- Spreadsheet-compatible
-test_export_markdown("results.md")    -- Human-readable documentation
+test_export_json()      -- Creates my_game_results.json
+test_export_csv()       -- Creates my_game_results.csv
+test_export_markdown()  -- Creates my_game_results.md
+
+-- Or override the default filename:
+test_export_json("custom.json")  -- Creates my_game_custom.json
 ```
+
+**Cart Name Prefixing:** Setting `cart_name` in `test_init()` automatically prefixes all export filenames. This prevents different test cartridges from overwriting each other's results when running multiple test suites.
 
 **Note:** PICO-8 may add `.p8l` extension to some files. The `ptd` command automatically cleans up these extensions for `.json` and `.md` files after test completion.
 

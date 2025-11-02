@@ -258,8 +258,17 @@ function test_get_results()
 end
 
 -- Export results to JSON format
+-- filename: optional filename override (default uses cart_name prefix)
 function test_export_json(filename)
-    filename = filename or "test_results.json"
+    -- Get cart name prefix
+    local prefix = test_get_cart_name and test_get_cart_name() or "test_cart"
+    filename = filename or (prefix .. "_results.json")
+    
+    -- If filename doesn't already start with prefix, add it
+    if sub(filename, 1, #prefix) ~= prefix then
+        filename = prefix .. "_" .. filename
+    end
+    
     local json = "{"
     json = json .. '"passed":' .. test_results.passed .. ','
     json = json .. '"failed":' .. test_results.failed .. ','
@@ -285,8 +294,17 @@ function test_export_json(filename)
 end
 
 -- Export results to CSV format
+-- filename: optional filename override (default uses cart_name prefix)
 function test_export_csv(filename)
-    filename = filename or "test_results.csv"
+    -- Get cart name prefix
+    local prefix = test_get_cart_name and test_get_cart_name() or "test_cart"
+    filename = filename or (prefix .. "_results.csv")
+    
+    -- If filename doesn't already start with prefix, add it
+    if sub(filename, 1, #prefix) ~= prefix then
+        filename = prefix .. "_" .. filename
+    end
+    
     local csv = "passed,failed,total\n"
     csv = csv .. test_results.passed .. "," .. test_results.failed .. "," .. test_results.total .. "\n"
 
@@ -304,8 +322,17 @@ function test_export_csv(filename)
 end
 
 -- Export results to Markdown format
+-- filename: optional filename override (default uses cart_name prefix)
 function test_export_markdown(filename)
-    filename = filename or "test_results.md"
+    -- Get cart name prefix
+    local prefix = test_get_cart_name and test_get_cart_name() or "test_cart"
+    filename = filename or (prefix .. "_results.md")
+    
+    -- If filename doesn't already start with prefix, add it
+    if sub(filename, 1, #prefix) ~= prefix then
+        filename = prefix .. "_" .. filename
+    end
+    
     local md = "# Test Results\n\n"
     md = md .. "- Passed: " .. test_results.passed .. "\n"
     md = md .. "- Failed: " .. test_results.failed .. "\n"

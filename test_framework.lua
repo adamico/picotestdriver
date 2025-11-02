@@ -45,13 +45,15 @@ end
 --   timeout_seconds = nil,                     -- Optional: override with seconds from command line
 --   debug_level = "info",                      -- "none", "info", "debug"
 --   log_file = nil,                            -- Optional: filename to save logs (e.g., "test.log")
---   export_format = nil                        -- Optional: "json", "csv", or "markdown" for structured export
+--   export_format = nil,                       -- Optional: "json", "csv", or "markdown" for structured export
+--   cart_name = nil                            -- Optional: prefix for export filenames (default: "test_cart")
 -- }
 function test_init(options)
     test_framework.options = options or {}
     test_framework.options.subtests = test_framework.options.subtests or {}
     test_framework.options.default_subtest = test_framework.options.default_subtest or "default"
     test_framework.options.debug_level = test_framework.options.debug_level or "info"
+    test_framework.options.cart_name = test_framework.options.cart_name or "test_cart"
     
     -- Debug: show if log_file is set
     if test_framework.options.log_file then
@@ -243,4 +245,9 @@ function test_at_frame(target_frame, callback)
     if test_framework.frame_count == target_frame then
         callback()
     end
+end
+
+-- Get cart name for export filename prefixing
+function test_get_cart_name()
+    return test_framework.options.cart_name or "test_cart"
 end

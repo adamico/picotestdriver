@@ -38,7 +38,8 @@ function _init()
     subtests = subtests,  -- Pass full subtest table with durations
     timeout_buffer = 180, -- 3 second safety buffer (default, can be omitted)
     debug_level = "info",
-    log_file = "test_demo.log"  -- Save all logs to this file
+    log_file = "test_demo.log",  -- Save all logs to this file
+    cart_name = "test_demo"  -- Prefix for export files
   })
 
   init_game()
@@ -233,10 +234,10 @@ function next_subtest()
   else
     test_log("All subtests complete!", "info")
     
-    -- Export test results in multiple formats
-    test_export_json("test_results.json")
-    test_export_csv("test_results.csv")
-    test_export_markdown("test_results.md")
+    -- Export test results in multiple formats (uses cart_name prefix)
+    test_export_json()  -- Creates test_demo_results.json
+    test_export_csv()   -- Creates test_demo_results.csv
+    test_export_markdown()  -- Creates test_demo_results.md
     
     test_complete("All subtests complete")
   end

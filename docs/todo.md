@@ -4,6 +4,8 @@
 
 ### 1:test
 ### 2:fix
+- [ ] rename export logs with the card name to avoid overwriting when testing multiple carts
+- [ ] can we create subfolders for each cart to store their logs separately?
 ### 3:feat
 - [ ] add succinct info for visual test results display in demo cartridge
 ### 4:refactor
