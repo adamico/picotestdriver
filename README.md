@@ -171,8 +171,32 @@ test_complete()
 -- Automatically calls test_complete() when timeout is reached
 test_update_frame()
 
--- Logging
-test_log("Message", "info")  -- "info", "debug", "warn", "error"
+-- Logging with levels
+test_log("Message", "info")   -- General information (default)
+test_log("Message", "debug")  -- Detailed debugging info
+test_log("Message", "warn")   -- Warnings
+test_log("Message", "error")  -- Errors
+```
+
+**Log Levels:**
+- `debug_level = "none"` - Suppress all logging output
+- `debug_level = "info"` - Show INFO, WARN, ERROR messages (default)
+- `debug_level = "debug"` - Show all messages including DEBUG
+
+When using `debug_level = "debug"`, you'll see detailed information about:
+- Button state changes
+- Frame-by-frame test execution
+- Auto-calculated timeout values
+- Internal test framework operations
+
+Example output with debug level:
+```
+[DEBUG] Auto-calculated timeout: 1440 frames
+[DEBUG] Button 1 pressed
+[INFO] === MOVEMENT TEST ===
+[INFO] ✓ MOVEMENT: Player moves right
+[WARN] No collision expected at this position
+[ERROR] Test failed: Expected value 10, got 5
 ```
 
 #### Test Utilities
