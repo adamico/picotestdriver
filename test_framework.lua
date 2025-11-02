@@ -9,11 +9,39 @@ local test_framework = {
     overrides = {} -- Store original functions for restoration
 }
 
+-- Calculate total timeout based on subtest durations
+-- subtests: array of {name="test1", duration=120} tables or simple string array
+-- buffer: optional safety buffer in frames (default: 180 frames = 3 seconds)
+function test_calculate_timeout(subtests, buffer)
+    buffer = buffer or 180
+    local total = 0
+    local has_durations = false
+    
+    if not subtests then
+        return 1800 -- Default 30 seconds if no subtests provided
+    end
+    
+    for i = 1, #subtests do
+        if type(subtests[i]) == "table" and subtests[i].duration then
+            total = total + subtests[i].duration
+            has_durations = true
+        end
+    end
+    
+    -- If no durations found, return default timeout
+    if not has_durations then
+        return 1800 -- Default 30 seconds
+    end
+    
+    return total + buffer
+end
+
 -- Initialize the test framework
 -- options: {
---   subtests = {"subtest1", "subtest2", ...},  -- Available test subtests
+--   subtests = {"subtest1", "subtest2", ...} or [{name="test1", duration=120}, ...],
 --   default_subtest = "subtest1",              -- Default subtest if none specified
---   timeout_frames = 1800,                     -- Default timeout (30 seconds at 60fps)
+--   timeout_frames = nil,                      -- Optional: manual timeout override
+--   timeout_buffer = 180,                      -- Optional: safety buffer for auto-calculated timeout (default: 3 seconds)
 --   timeout_seconds = nil,                     -- Optional: override with seconds from command line
 --   debug_level = "info"                       -- "none", "info", "debug"
 -- }
@@ -21,8 +49,14 @@ function test_init(options)
     test_framework.options = options or {}
     test_framework.options.subtests = test_framework.options.subtests or {}
     test_framework.options.default_subtest = test_framework.options.default_subtest or "default"
-    test_framework.options.timeout_frames = test_framework.options.timeout_frames or 1800
     test_framework.options.debug_level = test_framework.options.debug_level or "info"
+    
+    -- Auto-calculate timeout if not explicitly set and subtests have durations
+    if not test_framework.options.timeout_frames then
+        local buffer = test_framework.options.timeout_buffer or 180
+        test_framework.options.timeout_frames = test_calculate_timeout(test_framework.options.subtests, buffer)
+        test_log("Auto-calculated timeout: " .. test_framework.options.timeout_frames .. " frames", "debug")
+    end
 
     -- Read command line parameters (format: "subtest:timeout" or just "subtest")
     local cmd_args = stat(6)
@@ -55,8 +89,11 @@ function test_init(options)
     -- Validate subtest
     if test_framework.subtest and test_framework.subtest ~= "" and test_framework.subtest ~= "timeout" then
         local valid_subtest = false
-        for _, subtest in ipairs(test_framework.options.subtests) do
-            if subtest == test_framework.subtest then
+        for i = 1, #test_framework.options.subtests do
+            local subtest = test_framework.options.subtests[i]
+            -- Handle both string arrays and {name, duration} tables
+            local subtest_name = type(subtest) == "table" and subtest.name or subtest
+            if subtest_name == test_framework.subtest then
                 valid_subtest = true
                 break
             end

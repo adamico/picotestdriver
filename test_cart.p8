@@ -1,8 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
--- Pico Test Driver
--- by kc00l - PICO-8 Automated Testing Framework - Test Your Games Like a Pro!
+-- PicoTestDriver - PTD
+-- by kc00l
 #include test_framework.lua
 #include test_utils.lua
 #include main.lua
