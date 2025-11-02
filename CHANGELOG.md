@@ -1,98 +1,18 @@
 # Changelog
 
-### Added
-- feat: add auto-accept flag for non-interactive changelog generation
-- feat: add automatic CHANGELOG sync validation with git tags
-- feat: add auto-timeout calculation and comprehensive input tests
-- feat: add -c/--cart option to specify test cartridge file
-- feat: add color formatting to all help text and command output
-- feat: add comprehensive edge case tests to demo cartridge
-- feat: add comprehensive GitHub repository enhancements
-- feat: add demo option and clean up demo cartridge
-- feat: add --release flag to automate version releases
-- feat: add --release flag with version section ordering fix
-- feat: add shared functions library for code consistency
-- feat: add test file for changelog automation verification
-- feat: add test file generator script
-- feat: add unified ptd command with subcommands
-- feat: add VERSION file as single source of truth
-- feat: auto-update README version badge during release
-- feat: enhance --list option to check included .lua files and update docs
-- feat: implement working changelog automation with git log parsing
-- feat: improve changelog generation to properly merge [Unreleased] sections
-- feat: remove [Unreleased] section from user-facing CHANGELOG
-- See git history for details: `git log v1.0.1`
-
-### Fixed
-- fix: clean up duplicate entries in CHANGELOG using changelog --clean tool
-- fix: improve input simulation utilities with test coverage
-- fix: improve test utilities and documentation
-- fix: subtest selection, completion messages, and timeout handling
-- fix: correct unreleased content extraction in release function
-- fix: add deduplication to changelog merge to prevent duplicate entries
-- fix: improve error handling in test runner
-- fix: cart metadata
-
-### Changed
-- refactor: remove changelog automation files (extracted to standalone library)
-- refactor: improve changelog format with categorized sections
-- refactor: remove old scripts and migrate to ptd command only
-- refactor: simplify --list output to show only subtest names
-- refactor: rename phases to subtests for clarity
-- refactor: clean up CHANGELOG and move roadmap to development_notes
-
-### Documentation
-- docs: add AI agent workflow guide to project structure
-- docs: add balanced guidance on AI-assisted development practices (Claude 4 > Grok)
-- docs: add comprehensive AI agent workflow guide
-- docs: add GitHub About section reference for repository setup
-- docs: add semver and release workflow to copilot instructions
-- docs: add terminal command patterns for auto-approval in Copilot
-- docs: clean up completed todo items
-- docs: document extraction of changelog automation to standalone library
-- docs: document log levels and debug settings
-- docs: document test_calculate_timeout helper function
-- docs: document test file generator and update todo
-- docs: rebuild CHANGELOG from git tag history
-- docs: rebuild CHANGELOG with fixed git-changelog-automation v1.2.1
-- docs: removed mention of obsi from changelog footer
-- docs: rename PICO-8 TEST FRAMEWORK to PicoTestDriver throughout
-- docs: simplify CHANGELOG header
-- docs: update changelog for v3.0.1
-- docs: update documentation for new button state functions
-- docs: update documentation for v1.0.1 with development environment setup
-- docs: update run_test.sh help to promote test generator
-- docs: update todo.md with completed improvements
-
-### Tests
-- test: add comprehensive tests for generate_test.sh
-- test: add coverage for demo flag, no-args behavior, and exit codes
-- test: add comprehensive test suite for new changelog format
-- test: add comprehensive test suite for changelog generation script
-- test: add comprehensive unit testing framework for run_test.sh
-
-### Build
-- build: release v3.0.0
-- build: prepare release v1.1.1
-- build: prepare release v1.1.0 with consolidated changelog
-
-### Chores
-- chore: release v3.0.3
-- chore: release v3.0.2
-- chore: bump version to 3.0.1
-- chore: bump version to 2.0.2
-- chore: bump version to 2.0.1
-- chore: bump version to 2.0.0
-- chore: release version 1.3.0
-- chore: release version 1.1.3
-- chore: add remaining project files and complete initial setup
-- chore: add VS Code settings for PICO-8 development
-- chore: add git hooks and conventional commit configuration
-
-
 ## [3.1.0] - 2025-11-02
 
+### Added
+- feat: add auto-timeout calculation and comprehensive input tests
 
+### Documentation
+- docs: document test_calculate_timeout helper function
+- docs: document log levels and debug settings
+- docs: add terminal command patterns for auto-approval in Copilot
+- docs: rebuild CHANGELOG with fixed git-changelog-automation v1.2.1
+
+### Chores
+- chore: release v3.1.0
 
 ## [3.0.3] - 2025-11-01
 
@@ -261,6 +181,9 @@
 ### Build
 - build: prepare release v1.1.0 with consolidated changelog
 
+### Chores
+- chore: add remaining project files and complete initial setup
+
 ## [1.0.0] - 2025-10-31
 
 ### Documentation
@@ -270,8 +193,4 @@
 - chore: add remaining project files and complete initial setup
 - chore: add VS Code settings for PICO-8 development
 - chore: add git hooks and conventional commit configuration
-## [1.0.1] - 2025-10-31
-
-### Added
-- See git history for details: `git log v1.0.1`
 
