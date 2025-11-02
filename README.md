@@ -9,6 +9,7 @@ A comprehensive automated testing framework for PICO-8 cartridges, enabling deve
 ## Features
 
 - **Automated Testing**: Run tests programmatically with detailed logging
+- **Auto-Timeout Calculation**: Automatically calculate test timeouts from subtest durations
 - **Command-Line Integration**: Execute specific test subtests via script parameters
 - **Test Generation**: Generate test files with boilerplate code in seconds
 - **Debug Output**: Comprehensive logging with multiple verbosity levels
@@ -106,21 +107,31 @@ Or add these lines to your cartridge manually:
 #include test_framework.lua
 #include test.lua
 
+-- Define subtests with durations for auto-timeout calculation
+local subtests = {
+    { name = "movement",  duration = 120 },
+    { name = "collision", duration = 180 },
+    { name = "combat",    duration = 240 },
+}
+
 function _init()
     -- Initialize your game
     init_game()
 
     -- Initialize test framework
-    local subtest_names = {}
-    for i = 1, #subtests do
-        subtest_names[i] = subtests[i].name
-    end
-    
+    -- Timeout will be auto-calculated: (120 + 180 + 240) + 180 buffer = 720 frames (12 seconds)
     test_init({
-        subtests = subtest_names,
-        timeout_frames = 1800,  -- 30 seconds
+        subtests = subtests,  -- Pass full table with durations
+        timeout_buffer = 180,  -- Optional: 3 second safety buffer (default)
         debug_level = "info"
     })
+    
+    -- Or manually set timeout (overrides auto-calculation):
+    -- test_init({
+    --     subtests = subtests,
+    --     timeout_frames = 1800,  -- Manual: 30 seconds
+    --     debug_level = "info"
+    -- })
 end
 
 function _update60()
@@ -135,6 +146,8 @@ function _update60()
 end
 ```
 
+**Pro tip:** Using auto-calculated timeouts means you never have to manually adjust the timeout when adding or modifying tests!
+
 ## Documentation
 
 ### Core API
@@ -142,15 +155,24 @@ end
 #### Test Framework
 
 ```lua
+-- Calculate timeout from subtest durations
+local timeout = test_calculate_timeout(subtests, buffer)
+-- subtests: array of {name="test1", duration=120} tables or string array
+-- buffer: optional safety buffer in frames (default: 180 frames = 3 seconds)
+-- Returns: total duration + buffer, or 1800 (30s) if no durations found
+
 -- Initialize the framework
 test_init(options)
 -- options: {
---   phases = {"phase1", "phase2", ...},
---   default_phase = "phase1",
---   timeout_frames = 1800,  -- Optional: defaults to 30s
---   debug_level = "info"    -- "none", "info", "debug"
+--   subtests = {"test1", "test2", ...} or [{name="test1", duration=120}, ...],
+--   default_subtest = "test1",
+--   timeout_frames = nil,      -- Optional: manual override (auto-calculated if omitted)
+--   timeout_buffer = 180,      -- Optional: buffer for auto-calculation (default: 3s)
+--   debug_level = "info"       -- "none", "info", "debug"
 -- }
--- Note: timeout_frames is automatically set from command line if provided
+-- Note: 
+-- - If subtests have durations and timeout_frames is not set, timeout is auto-calculated
+-- - timeout_frames can be overridden from command line (subtest:timeout format)
 
 -- Get current test phase
 local phase = test_get_phase()
