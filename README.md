@@ -15,6 +15,7 @@ A comprehensive automated testing framework for PICO-8 cartridges, enabling deve
 - **Debug Output**: Comprehensive logging with multiple verbosity levels
 - **Assertion Library**: Rich set of assertions for validating game behavior
 - **Performance Testing**: Measure frame rates and performance metrics
+- **File Logging**: Save test logs to files for analysis and debugging
 - **Easy Integration**: Drop-in framework for existing PICO-8 projects
 - **Cross-Platform**: Works on Linux, macOS, and Windows (via WSL)
 
@@ -244,6 +245,13 @@ local duration = test_end_timer()
 test_log_memory_usage("Before initialization")
 test_log_cpu_usage("After complex operation")
 local result = test_measure_performance(my_function, 100, "My Function")
+
+-- Logging to file (set in test_init)
+-- All test_log() calls will be saved to the specified file
+test_init({
+    subtests = {"test1", "test2"},
+    log_file = "test_output.log"  -- Optional: save logs to file
+})
 ```
 
 ### Command Line Usage
@@ -354,6 +362,88 @@ Available test subtests in 'test_cart.p8':
   timing
 
 Usage: ptd test -c test_cart.p8 SUBTEST
+```
+
+### Logging and Exporting Results
+
+#### Log Files
+
+Test logs can be saved to a file by specifying `log_file` in `test_init()`:
+
+```lua
+test_init({
+    subtests = {"movement", "collision"},
+    debug_level = "info",
+    log_file = "test_results.log"  -- Logs will be appended to this file
+})
+
+-- All test_log() calls will now output to both:
+-- 1. The terminal (via printh)
+-- 2. The specified log file
+```
+
+**Important:** PICO-8 automatically adds `.p8l` extension to log files and saves them to:
+- Linux: `~/.lexaloffle/pico-8/carts/test_results.log.p8l`
+- Windows: `%APPDATA%\pico-8\carts\test_results.log.p8l`
+- Mac: `~/Library/Application Support/pico-8/carts/test_results.log.p8l`
+
+Use the `FOLDER` command in PICO-8 to open the carts directory.
+
+**Example log output:**
+```
+[INFO] Test framework initialized - Subtest: movement
+[INFO] === MOVEMENT TEST ===
+[INFO] ✓ MOVEMENT: Player moves right
+[INFO] Test execution completed
+```
+
+#### Structured Export (JSON/CSV/Markdown)
+
+Use `test_record_result()` to track test results, then export them in structured formats:
+
+```lua
+-- Track test results
+test_reset_results()  -- Clear previous results
+test_record_result(true, "test_movement", nil)  -- Pass
+test_record_result(false, "test_collision", "Player not detected")  -- Fail
+
+-- Print summary to console
+test_print_results()
+
+-- Export to files (at end of tests)
+test_export_json("results.json")      -- Machine-readable for CI/CD
+test_export_csv("results.csv")        -- Spreadsheet-compatible
+test_export_markdown("results.md")    -- Human-readable documentation
+```
+
+**Note:** PICO-8 may add `.p8l` extension to some files. The `ptd` command automatically cleans up these extensions for `.json` and `.md` files after test completion.
+
+**JSON Example:**
+```json
+{"passed":10,"failed":2,"total":12,"failures":[{"name":"test_collision","message":"Player not detected","frame":450}]}
+```
+
+**CSV Example:**
+```csv
+passed,failed,total
+10,2,12
+
+name,message,frame
+test_collision,Player not detected,450
+```
+
+**Markdown Example:**
+```markdown
+# Test Results
+
+- Passed: 10
+- Failed: 2
+- Total: 12
+- Success Rate: 83.3%
+
+## Failures
+
+- **test_collision**: Player not detected (frame 450)
 ```
 
 ### Example Test

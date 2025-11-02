@@ -252,6 +252,82 @@ function test_print_results()
     test_log("Success rate: " .. tostr(success_rate) .. "%", "info")
 end
 
+function test_get_results()
+    -- Return the test_results table for external use
+    return test_results
+end
+
+-- Export results to JSON format
+function test_export_json(filename)
+    filename = filename or "test_results.json"
+    local json = "{"
+    json = json .. '"passed":' .. test_results.passed .. ','
+    json = json .. '"failed":' .. test_results.failed .. ','
+    json = json .. '"total":' .. test_results.total .. ','
+    json = json .. '"failures":['
+
+    for i = 1, #test_results.failures do
+        local f = test_results.failures[i]
+        if i > 1 then json = json .. ',' end
+        json = json .. '{'
+        json = json .. '"name":"' .. (f.name or "") .. '",'
+        json = json .. '"message":"' .. (f.message or "") .. '",'
+        json = json .. '"frame":' .. (f.frame or 0)
+        json = json .. '}'
+    end
+
+    json = json .. ']}'
+    
+    -- Save to file (PICO-8 adds .p8l extension automatically)
+    printh(json, filename, true) -- overwrite mode
+    test_log("Results exported to " .. filename .. ".p8l (JSON)", "info")
+    return json
+end
+
+-- Export results to CSV format
+function test_export_csv(filename)
+    filename = filename or "test_results.csv"
+    local csv = "passed,failed,total\n"
+    csv = csv .. test_results.passed .. "," .. test_results.failed .. "," .. test_results.total .. "\n"
+
+    if #test_results.failures > 0 then
+        csv = csv .. "\nname,message,frame\n"
+        for f in all(test_results.failures) do
+            csv = csv .. (f.name or "") .. "," .. (f.message or "") .. "," .. (f.frame or 0) .. "\n"
+        end
+    end
+
+    -- Save to file
+    printh(csv, filename, true) -- overwrite mode
+    test_log("Results exported to " .. filename .. ".p8l (CSV)", "info")
+    return csv
+end
+
+-- Export results to Markdown format
+function test_export_markdown(filename)
+    filename = filename or "test_results.md"
+    local md = "# Test Results\n\n"
+    md = md .. "- Passed: " .. test_results.passed .. "\n"
+    md = md .. "- Failed: " .. test_results.failed .. "\n"
+    md = md .. "- Total: " .. test_results.total .. "\n"
+
+    local success_rate = test_results.total > 0 and (test_results.passed / test_results.total * 100) or 0
+    md = md .. "- Success Rate: " .. flr(success_rate * 10) / 10 .. "%\n"
+
+    if #test_results.failures > 0 then
+        md = md .. "\n## Failures\n\n"
+        for f in all(test_results.failures) do
+            md = md .. "- **" .. (f.name or "unknown") .. "**: " .. 
+                      (f.message or "no message") .. " (frame " .. (f.frame or 0) .. ")\n"
+        end
+    end
+
+    -- Save to file
+    printh(md, filename, true) -- overwrite mode
+    test_log("Results exported to " .. filename .. ".p8l (Markdown)", "info")
+    return md
+end
+
 -- Export functions (global in PICO-8)
 test_set_button_state = test_set_button_state
 test_get_button_state = test_get_button_state
@@ -275,3 +351,7 @@ test_log_cpu_usage = test_log_cpu_usage
 test_reset_results = test_reset_results
 test_record_result = test_record_result
 test_print_results = test_print_results
+test_get_results = test_get_results
+test_export_json = test_export_json
+test_export_csv = test_export_csv
+test_export_markdown = test_export_markdown

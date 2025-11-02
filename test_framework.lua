@@ -43,13 +43,20 @@ end
 --   timeout_frames = nil,                      -- Optional: manual timeout override
 --   timeout_buffer = 180,                      -- Optional: safety buffer for auto-calculated timeout (default: 3 seconds)
 --   timeout_seconds = nil,                     -- Optional: override with seconds from command line
---   debug_level = "info"                       -- "none", "info", "debug"
+--   debug_level = "info",                      -- "none", "info", "debug"
+--   log_file = nil,                            -- Optional: filename to save logs (e.g., "test.log")
+--   export_format = nil                        -- Optional: "json", "csv", or "markdown" for structured export
 -- }
 function test_init(options)
     test_framework.options = options or {}
     test_framework.options.subtests = test_framework.options.subtests or {}
     test_framework.options.default_subtest = test_framework.options.default_subtest or "default"
     test_framework.options.debug_level = test_framework.options.debug_level or "info"
+    
+    -- Debug: show if log_file is set
+    if test_framework.options.log_file then
+        printh("Log file configured: " .. test_framework.options.log_file)
+    end
     
     -- Auto-calculate timeout if not explicitly set and subtests have durations
     if not test_framework.options.timeout_frames then
@@ -182,7 +189,15 @@ function test_log(message, level)
         prefix = "[INFO] "
     end
 
-    printh(prefix .. message)
+    local formatted_message = prefix .. message
+
+    -- Output to console (terminal)
+    printh(formatted_message)
+
+    -- Optionally save to log file
+    if test_framework.options.log_file then
+        printh(formatted_message, test_framework.options.log_file, false) -- append mode
+    end
 end
 
 -- Override a function for testing/debugging

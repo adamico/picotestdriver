@@ -336,6 +336,35 @@ cmd_test() {
         print_color $RED "Test execution failed with exit code $EXIT_CODE"
     fi
 
+    # Rename PICO-8 log files to remove .p8l extension
+    # PICO-8 saves files to ~/.lexaloffle/pico-8/carts/
+    local PICO8_CARTS_DIR="$HOME/.lexaloffle/pico-8/carts"
+    if [ -d "$PICO8_CARTS_DIR" ]; then
+        print_color $BLUE "Cleaning up log file extensions..."
+        
+        # Rename .json.p8l to .json
+        for file in "$PICO8_CARTS_DIR"/*.json.p8l; do
+            if [ -f "$file" ]; then
+                local new_name="${file%.p8l}"
+                mv "$file" "$new_name"
+                print_color $GREEN "  Renamed: $(basename "$file") → $(basename "$new_name")"
+            fi
+        done
+        
+        # Rename .md.p8l to .md
+        for file in "$PICO8_CARTS_DIR"/*.md.p8l; do
+            if [ -f "$file" ]; then
+                local new_name="${file%.p8l}"
+                mv "$file" "$new_name"
+                print_color $GREEN "  Renamed: $(basename "$file") → $(basename "$new_name")"
+            fi
+        done
+        
+        # .log.p8l files stay as they are (standard PICO-8 log format)
+    fi
+    
+    echo ""
+
     exit $EXIT_CODE
 }
 

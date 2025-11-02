@@ -38,6 +38,7 @@ function _init()
     subtests = subtests,  -- Pass full subtest table with durations
     timeout_buffer = 180, -- 3 second safety buffer (default, can be omitted)
     debug_level = "info",
+    log_file = "test_demo.log"  -- Save all logs to this file
   })
 
   init_game()
@@ -231,6 +232,12 @@ function next_subtest()
     init_game()
   else
     test_log("All subtests complete!", "info")
+    
+    -- Export test results in multiple formats
+    test_export_json("test_results.json")
+    test_export_csv("test_results.csv")
+    test_export_markdown("test_results.md")
+    
     test_complete("All subtests complete")
   end
 end
@@ -679,7 +686,8 @@ function test_utils_functions(frame)
     test_print_results()
 
     -- Verify results were tracked
-    local results_exist = test_results and test_results.total > 0
+    local results = test_get_results()
+    local results_exist = results and results.total > 0
     if results_exist then
       test_log("✓ TEST_UTILS: Result tracking works", "info")
     else
