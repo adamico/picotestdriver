@@ -10,9 +10,9 @@ These instructions help AI assistants understand the framework's patterns and co
 - **`test_utils.lua`** - Testing utilities including assertions, performance measurement, input simulation, and result collection
 - **`ptd`** - Bash script for command-line test execution with timeout and parameter passing
 - **`test_cart.p8`** - Example cartridge demonstrating framework integration and test patterns
-- **`init.lua`** - Example game initialization logic
-- **`update.lua`** - Example game update logic
-- **`draw.lua`** - Example game drawing logic
+- **`demo_cart/init.lua`** - Example game initialization logic for the demo cartridge
+- **`demo_cart/update.lua`** - Example game update logic for the demo cartridge
+- **`demo_cart/draw.lua`** - Example game drawing logic for the demo cartridge
 
 ## Architecture & Patterns
 

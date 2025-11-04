@@ -540,8 +540,12 @@ picotestdriver/
 │   └── README.md                   # Scripts documentation
 ├── test_framework.lua             # Core testing framework
 ├── test_utils.lua                 # Testing utilities
-├── main.lua                       # Demo test implementation
-├── test_cart.p8                  # Demo cartridge
+├── demo_cart/                     # Demo cartridge source files
+│   ├── init.lua                   # Demo test initialization and subtests
+│   ├── update.lua                 # Demo update logic and helpers
+│   ├── draw.lua                   # Demo draw logic
+│   └── test_helper.lua            # Demo-specific test helpers
+├── test_cart.p8                   # Demo cartridge
 ├── .vscode/                       # VS Code settings
 │   └── settings.json              # PICO-8 configuration
 ├── .github/                       # GitHub configuration

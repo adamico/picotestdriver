@@ -29,5 +29,6 @@ function next_subtest()
 end
 
 -- Test functions (movement, collision, input, boundary, assertions, timing, etc.)
--- (content moved from demo helper; keep tests short in this file)
--- The larger test function implementations are kept in `test_helper.lua` at repo root
+-- Add or edit demo-specific test functions in this file. The demo cartridge
+-- keeps its test helpers here under `demo_cart/test_helper.lua` so demo code
+-- is separated from the framework files (`test_framework.lua`, `test_utils.lua`).
