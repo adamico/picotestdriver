@@ -48,7 +48,7 @@ source "$LIB_DIR/test_functions.sh"
 
 - `show_help()` - Show help message
 - `show_configuration(cart_file, phase, timeout, verbose)` - Show configuration
-- `handle_list_phases(cart_file)` - Handle list phases option
+- `handle_list_subtests(cart_file)` - Handle list subtests option
 
 ## Timeout Parameter Feature
 
