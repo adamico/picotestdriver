@@ -203,8 +203,8 @@ For more information, visit: https://github.com/your-repo/pico8-test-framework
 EOF
 }
 
-# Function to handle list phases option
-handle_list_phases() {
+# Function to handle listing subtests (used by the CLI)
+handle_list_subtests() {
     local cart_file=$1
 
     print_color $BLUE "=== Available Test Phases ==="
