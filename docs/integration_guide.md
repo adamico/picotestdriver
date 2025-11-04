@@ -83,29 +83,28 @@ function test_movement()
 end
 ```
 
-### Step 6: Run Tests
+# Step 6: Run Tests
 
 ```bash
-# Run all tests
-./run_test.sh
+# Run all tests (use the public CLI)
+./ptd test
 
 # Run specific test
-./run_test.sh movement
+./ptd test movement
 
 # Run with longer timeout
-./run_test.sh collision 60
+./ptd test collision 60
 
-# List available test phases
-./run_test.sh --list
-./run_test.sh -l -c my_test.p8
+# List available test phases (preferred)
+./ptd list -c my_test.p8
 ```
 
 #### Discovering Test Phases
 
-Use the `--list` option to see all available test phases in your cartridge:
+Use the `ptd list` command to see all available test phases in your cartridge:
 
 ```bash
-./run_test.sh --list
+./ptd list -c my_test.p8
 ```
 
 This will scan your cartridge and included `.lua` files to find all defined test phases. Example output:

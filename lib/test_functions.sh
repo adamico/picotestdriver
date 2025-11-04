@@ -168,7 +168,7 @@ ARGUMENTS:
 OPTIONS:
     -h, --help      Show this help message
     -c, --cart      Specify the test cartridge file (default: test_cart.p8)
-    -l, --list      List available test phases (requires cartridge)
+    -l, --list      List available test phases (no PICO-8 required)
     -v, --version   Show version information
     --verbose       Enable verbose output
 
@@ -186,7 +186,7 @@ EXAMPLES:
         Run tests in my_test.p8 cartridge
 
     ./run_test.sh --list
-        List all available test phases
+        List available test phases (preferred: use 'ptd list -c <cartridge>')
 
 REQUIREMENTS:
     - PICO-8 executable must be in PATH
@@ -209,80 +209,68 @@ handle_list_phases() {
 
     print_color $BLUE "=== Available Test Phases ==="
 
-    # Get the directory of the cartridge file
     local cart_dir
     cart_dir=$(dirname "$cart_file")
 
-    # Collect all phases from cartridge and included files
-    local all_phases=""
-    local found_phases=false
+    extract_subtests() {
+        local file=$1
+        # Extract name = "..." and name = '...' occurrences between the subtests table
+        local names
+        names=$( (sed -n -E 's/.*name[[:space:]]*=[[:space:]]*"(.*)".*/\1/p' "$file" 2>/dev/null || true; \
+                  sed -n -E "s/.*name[[:space:]]*=[[:space:]]*'([^']+)'.*/\1/p" "$file" 2>/dev/null || true) | tr -d '\r')
+        echo "$names"
+    }
 
-    # First check the cartridge file itself
+    local all_subtests=""
+    local found_subtests=false
+
     if [ -f "$cart_file" ]; then
-        local phases_line
-        phases_line=$(grep -A 20 "test_init" "$cart_file" | grep "phases\s*=\s*{" | head -1)
-
-        if [ -n "$phases_line" ]; then
-            local phases_array
-            phases_array=$(echo "$phases_line" | sed 's/.*phases\s*=\s*{//' | sed 's/}.*//')
-            all_phases="$phases_array"
-            found_phases=true
+        local cart_subtests
+        cart_subtests=$(extract_subtests "$cart_file")
+        if [ -n "$cart_subtests" ]; then
+            all_subtests="$cart_subtests"
+            found_subtests=true
         fi
-    fi
 
-    # Then check included .lua files (excluding test_framework.lua and test_utils.lua)
-    if [ -f "$cart_file" ]; then
         local included_files
-        included_files=$(grep "^#include" "$cart_file" | sed 's/#include //' | grep '\.lua$' | grep -v 'test_framework\.lua' | grep -v 'test_utils\.lua')
+        included_files=$(grep "^#include" "$cart_file" | sed 's/#include //' | grep '\.lua$' | grep -v 'test_framework\.lua' | grep -v 'test_utils\.lua' || true)
 
         for lua_file in $included_files; do
-            # Resolve the path relative to the cartridge file directory
             local resolved_path
             if [[ "$lua_file" == /* ]]; then
-                # Absolute path
                 resolved_path="$lua_file"
             else
-                # Relative path
                 resolved_path="$cart_dir/$lua_file"
             fi
 
             if [ -f "$resolved_path" ]; then
-                phases_line=$(grep -A 20 "test_init" "$resolved_path" | grep "phases\s*=\s*{" | head -1)
-                if [ -n "$phases_line" ]; then
-                    local phases_array
-                    phases_array=$(echo "$phases_line" | sed 's/.*phases\s*=\s*{//' | sed 's/}.*//')
-                    if [ -n "$all_phases" ]; then
-                        all_phases="$all_phases,$phases_array"
+                local file_subtests
+                file_subtests=$(extract_subtests "$resolved_path")
+                if [ -n "$file_subtests" ]; then
+                    if [ -n "$all_subtests" ]; then
+                        all_subtests="$all_subtests"$'\n'"$file_subtests"
                     else
-                        all_phases="$phases_array"
+                        all_subtests="$file_subtests"
                     fi
-                    found_phases=true
+                    found_subtests=true
                 fi
             fi
         done
     fi
 
-    if [ "$found_phases" = true ]; then
-        # Remove duplicates and split by comma and process each phase
-        local unique_phases
-        unique_phases=$(echo "$all_phases" | tr ',' '\n' | sort | uniq | tr '\n' ',' | sed 's/,$//')
-
+    if [ "$found_subtests" = true ]; then
+        local unique_subtests
+        unique_subtests=$(echo "$all_subtests" | sort | uniq)
         echo "Available test phases in $cart_file:"
         echo "  - all              : Run all test phases"
-
-        IFS=',' read -ra PHASE_ARRAY <<< "$unique_phases"
-        for phase in "${PHASE_ARRAY[@]}"; do
-            # Trim whitespace and quotes
-            phase=$(echo "$phase" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/"//g' | sed "s/'//g")
-
-            if [ -n "$phase" ]; then
-                echo "  - ${phase}          : Test phase"
+        while IFS= read -r subtest; do
+            if [ -n "$subtest" ]; then
+                echo "  - $subtest          : Test phase"
             fi
-        done
+        done <<< "$unique_subtests"
         echo ""
-        echo "Use './run_test.sh -c $cart_file <phase>' to run a specific test."
+        echo "Use 'ptd test -c $cart_file <phase>' to run a specific test."
     else
-        # Fallback to generic list if parsing fails
         echo "The following test phases are commonly available:"
         echo "  - movement_test    : Test player movement mechanics"
         echo "  - collision_test   : Test collision detection"
@@ -291,6 +279,6 @@ handle_list_phases() {
         echo "  - all              : Run all test phases"
         echo ""
         echo "Note: Available phases depend on the specific test cartridge implementation."
-        echo "Use './run_test.sh -c <cartridge> <phase>' to run a specific test."
+    echo "Use 'ptd test -c <cartridge> <phase>' to run a specific test."
     fi
 }

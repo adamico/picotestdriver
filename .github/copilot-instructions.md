@@ -78,9 +78,9 @@ end
 - Overview: `ptd` is the repository CLI (see `ptd` at repo root). Key commands are `test`, `generate`, `help`, `version`.
 
     - `ptd test` details:
-    - Flags: `-c|--cart <file>` (cartridge), `-d|--demo` (use demo cart), `-l|--list` (list subtests; legacy), `--verbose`, `-h|--help`, `-v|--version`.
+    - Flags: `-c|--cart <file>` (cartridge), `-d|--demo` (use demo cart), `-l|--list` (legacy compatibility), `--verbose`, `-h|--help`, `-v|--version`.
     - Positionals: `SUBTEST` (name) and optional numeric `TIMEOUT` (seconds). Defaults: `test_cart.p8`, `30` seconds.
-    - Listing subtests: prefer the dedicated `ptd list -c <file>` command to enumerate subtests. The legacy `--list` flag on `ptd test` continues to work; both implementations extract `local subtests = { ... }` from the `.p8` and any included `.lua` files (ignore `test_framework.lua` and `test_utils.lua`) and print unique names.
+    - Listing subtests: prefer the dedicated `ptd list -c <file>` command to enumerate subtests. Listing is implemented to work without a local PICO‑8 binary. A legacy `--list` flag on `ptd test` is kept for compatibility.
     - Requirements: `pico8` must be in `PATH`; the script uses the `timeout` command to limit runtime. It builds a command like `pico8 -run <cart>` and forwards `-p <subtest>:<timeout>` or `-p timeout:<timeout>`.
     - Useful exit codes: `0` success, `1` invalid args, `2` pico8 missing, `3` cartridge not found, `124` timeout.
 

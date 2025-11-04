@@ -37,7 +37,7 @@ print_color() {
     echo -e "${color}${message}${NC}"
 }
 
-# List subtests helper (top-level so it can be used by both `ptd test --list` and `ptd list`)
+# List subtests helper (top-level so it can be used by the `ptd list` command and compatibility flags)
 handle_list_subtests() {
     local cart_file=$1
     print_color $BLUE "Available test subtests in '$cart_file':"
@@ -191,8 +191,8 @@ cmd_test() {
         print_color $GREEN "    ptd test -c my_test.p8 collision 60"
         print_color $NC "        Run collision tests with 60 second timeout"
         echo ""
-        print_color $GREEN "    ptd test -c my_test.p8 --list"
-        print_color $NC "        List all available test subtests"
+    print_color $GREEN "    ptd list -c my_test.p8"
+    print_color $NC "        List all available test subtests (preferred)"
         echo ""
         print_color $YELLOW "EXIT CODES:"
         print_color $NC "    0   Success"

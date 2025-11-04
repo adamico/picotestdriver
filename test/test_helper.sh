@@ -39,7 +39,7 @@ ARGUMENTS:
 OPTIONS:
     -h, --help      Show this help message
     -c, --cart      Specify the test cartridge file (default: test_cart.p8)
-    -l, --list      List available test phases (requires cartridge)
+    -l, --list      List available test phases (no PICO-8 required)
     -v, --version   Show version information
     --verbose       Enable verbose output
 

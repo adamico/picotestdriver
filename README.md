@@ -336,33 +336,30 @@ PicoTestDriver returns standard exit codes for automation and CI/CD integration:
 - **`-t, --timeout SECONDS`**: Default timeout in seconds (default: `30`)
 - **`--framework-path PATH`**: Path to test_framework.lua (default: `../lib/picotestdriver/test_framework.lua`)
 
-#### The --list Option
+#### Listing available subtests
 
-The `--list` (or `-l`) option inspects your test cartridge and displays all available test subtests. It searches for subtest definitions in:
-
-1. The cartridge file itself (`.p8`)
-2. All included `.lua` files (excluding `test_framework.lua` and `test_utils.lua`)
+Use the dedicated `ptd list` command to enumerate subtests in a cartridge. Listing no longer requires a local PICO‑8 binary and will scan the cartridge and included `.lua` files (it ignores `test_framework.lua` and `test_utils.lua`).
 
 This helps you discover what test subtests are available in your cartridge without having to examine the code manually.
 
-**Examples:**
+Examples:
 
 ```bash
-# List subtests in demo cartridge
-./ptd test -d --list
+# List subtests from the demo cartridge
+./ptd list -d
 
-# List subtests in specific cartridge
-./ptd test -c my_game_tests.p8 --list
+# List subtests in a specific cartridge
+./ptd list -c my_game_tests.p8
 
 # Output example:
 Available test subtests in 'test_cart.p8':
-  assertions
-  boundary
-  collision
-  edge_cases
-  input
-  movement
-  timing
+    assertions
+    boundary
+    collision
+    edge_cases
+    input
+    movement
+    timing
 
 Usage: ptd test -c test_cart.p8 SUBTEST
 ```
@@ -845,7 +842,7 @@ Enable verbose logging:
 
 List available subtests:
 ```bash
-./ptd test -c my_test.p8 --list
+./ptd list -c my_test.p8
 ```
 
 Check PICO-8 console output for detailed logs and test_log() messages.
