@@ -15,63 +15,7 @@ if [ -f "$SCRIPT_DIR/test_helper.sh" ]; then
 	source "$SCRIPT_DIR/test_helper.sh"
 fi
 
-# If assertion helpers are not available (when running this file directly), provide lightweight replacements
-if ! declare -F assert_contains >/dev/null 2>&1; then
-	TESTS_RUN=0
-	TESTS_PASSED=0
-	TESTS_FAILED=0
-
-	assert_contains() {
-		local haystack="$1"
-		local needle="$2"
-		local message="${3:-"Expected haystack to contain needle"}"
-		((TESTS_RUN++))
-		if printf '%s' "$haystack" | grep -F -- "$needle" >/dev/null 2>&1; then
-			((TESTS_PASSED++))
-			echo "PASS: $message"
-		else
-			((TESTS_FAILED++))
-			echo "FAIL: $message"
-			echo "  Needle:   $needle"
-			# Print a short excerpt of haystack for debugging
-			printf '  Haystack (first 200 chars): %s\n' "$(printf '%s' "$haystack" | tr '\n' ' ' | cut -c1-200)"
-		fi
-		# Always return success so `set -e` in the caller doesn't abort the whole test run
-		return 0
-	}
-
-	assert_equals() {
-		local expected="$1"
-		local actual="$2"
-		local message="${3:-"Expected '$expected', got '$actual'"}"
-		((TESTS_RUN++))
-		if [ "$expected" = "$actual" ]; then
-			((TESTS_PASSED++))
-			echo "PASS: $message"
-		else
-			((TESTS_FAILED++))
-			echo "FAIL: $message"
-			echo "  Expected: $expected"
-			echo "  Actual:   $actual"
-		fi
-		# Keep function returning success to avoid failing the whole script under set -e
-		return 0
-	}
-
-	assert_false() {
-		local code="$1"
-		local message="${2:-"Expected non-zero/false"}"
-		((TESTS_RUN++))
-		if [ "$code" -ne 0 ] 2>/dev/null; then
-			((TESTS_PASSED++))
-			echo "PASS: $message"
-		else
-			((TESTS_FAILED++))
-			echo "FAIL: $message"
-		fi
-		return 0
-	}
-fi
+source "$(cd "$(dirname "$0")" && pwd)/assert_definitions.sh"
 
 echo "Preparing fake pico8 in PATH so tests don't require real PICO-8..."
 TMPBIN=$(mktemp -d)

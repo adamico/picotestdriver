@@ -7,33 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PTD="$ROOT_DIR/ptd"
 
-# Lightweight assertions (so this file can be run standalone)
-if ! declare -F assert_contains >/dev/null 2>&1; then
-    assert_contains() {
-        local hay="$1"; local needle="$2"; local msg="$3"
-        if printf '%s' "$hay" | grep -F -- "$needle" >/dev/null 2>&1; then
-            echo "PASS: ${msg:-contains $needle}"
-        else
-            echo "FAIL: ${msg:-contains $needle}"
-            echo "  Needle: $needle"
-            return 1
-        fi
-        return 0
-    }
-
-    assert_equals() {
-        local exp="$1"; local act="$2"; local msg="$3"
-        if [ "$exp" = "$act" ]; then
-            echo "PASS: ${msg:-equals}"
-            return 0
-        else
-            echo "FAIL: ${msg:-equals}"
-            echo "  Expected: $exp"
-            echo "  Actual:   $act"
-            return 1
-        fi
-    }
-fi
+source "$(cd "$(dirname "$0")" && pwd)/assert_definitions.sh"
 
 # Run `ptd list` with an empty PATH (simulate missing pico8)
 OLD_PATH="$PATH"

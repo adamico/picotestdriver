@@ -125,11 +125,14 @@ build_command() {
         cmd="$cmd -p timeout:${timeout}"
     fi
 
+    # When verbose, print the header to stderr so the command string remains
+    # the only content on stdout (so callers can capture it reliably).
     if [ "$verbose" = "true" ]; then
-        print_color $YELLOW "Command: $cmd"
-        echo ""
+        print_color $YELLOW "Command: $cmd" >&2
+        echo "" >&2
     fi
 
+    # Output the command string on stdout only
     echo "$cmd"
 }
 
@@ -142,7 +145,7 @@ show_configuration() {
 
     print_color $BLUE "=== PicoTestDriver v${SCRIPT_VERSION} ==="
     echo "Cartridge: $cart_file"
-    echo "Phase: $phase"
+    echo "Subtest: $phase"
     echo "Timeout: ${timeout}s"
     if [ "$verbose" = "true" ]; then
         echo "Verbose: enabled"

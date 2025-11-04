@@ -541,4 +541,15 @@ main() {
     esac
 }
 
+cmd_test() {
+    # Delegate test execution to the testable runner which sources shared functions
+    # This ensures consistent behavior with the test suite (parse_arguments, show_configuration, build_command, etc.)
+    if [ -x "$SCRIPT_DIR/run_test_testable.sh" ]; then
+        exec "$SCRIPT_DIR/run_test_testable.sh" "$@"
+    else
+        print_color $RED "Error: run_test_testable.sh not found or not executable in $SCRIPT_DIR"
+        exit 1
+    fi
+}
+
 main "$@"
