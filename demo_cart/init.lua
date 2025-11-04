@@ -1,34 +1,3 @@
--- Game state
-local player = {
-  x = 64,
-  y = 64,
-  dx = 0,
-  dy = 0,
-  speed = 1,
-  color = 7
-}
-
-local enemies = {}
-local bullets = {}
-
--- Test state
-local test_frame = 0
-local current_subtest = 1
-local subtest_start_frame = 0
-
--- Subtest definitions
-local subtests = {
-  { name = "movement",         duration = 120 },
-  { name = "collision",        duration = 120 },
-  { name = "input",            duration = 120 },
-  { name = "boundary",         duration = 120 },
-  { name = "assertions",       duration = 120 },
-  { name = "timing",           duration = 180 },
-  { name = "edge_cases",       duration = 120 },
-  { name = "test_utils",       duration = 240 },
-  { name = "timeout_calc",     duration = 120 },
-}
-
 function _init()
   test_log("=== PICOTESTDRIVER DEMO ===", "info")
 

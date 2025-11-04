@@ -96,3 +96,4 @@ function check_collisions()
   end
   return false
 end
+
