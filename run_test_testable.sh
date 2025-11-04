@@ -19,7 +19,7 @@ source "$LIB_DIR/test_functions.sh"
 # - build_command
 # - show_configuration
 # - show_help
-# - handle_list_phases
+# - handle_list_subtests
 
 
 # Additional functions specific to the testable version:
@@ -71,7 +71,7 @@ main() {
 
     # Handle list phases option
     if [ "$LIST_PHASES" = "true" ]; then
-        handle_list_phases "$CART_FILE"
+        handle_list_subtests "$CART_FILE"
         return 0
     fi
 
