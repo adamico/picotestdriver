@@ -3,9 +3,17 @@ version 43
 __lua__
 -- PicoTestDriver - PTD
 -- by kc00l
+
+-- PDT test framework files
 #include test_framework.lua
 #include test_utils.lua
-#include main.lua
+
+-- Demo cart specific files
+#include demo_cart/test_helper.lua
+#include demo_cart/init.lua
+#include demo_cart/update.lua
+#include demo_cart/draw.lua
+
 
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
