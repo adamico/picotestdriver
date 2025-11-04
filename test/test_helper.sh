@@ -95,49 +95,8 @@ show_configuration() {
     echo ""
 }
 
-# Function to handle list subtests option
-handle_list_subtests() {
-    local cart_file=$1
-
-    print_color $BLUE "Available test subtests in '$cart_file':"
-    echo ""
-
-    # Simplified output matching the actual implementation
-    local all_subtests=""
-    local found_subtests=false
-
-    # Extract subtest names from the cartridge file
-    # Look for: local subtests = { followed by { name = "xxx", ... } entries
-    if [ -f "$cart_file" ]; then
-        local names
-        names=$(awk '/local subtests\s*=\s*\{/,/^\}/ {
-            if ($0 ~ /name\s*=\s*"[^"]+"|name\s*=\s*'\''[^'\'']+'\''/) {
-                match($0, /(name\s*=\s*["'\''])([^"'\'']+)(["'\''])/, arr)
-                if (arr[2] != "") print arr[2]
-            }
-        }' "$cart_file")
-        
-        if [ -n "$names" ]; then
-            all_subtests="$names"
-            found_subtests=true
-        fi
-    fi
-
-    if [ "$found_subtests" = true ]; then
-        # Output each subtest name
-        while IFS= read -r subtest; do
-            if [ -n "$subtest" ]; then
-                echo "  $subtest"
-            fi
-        done <<< "$all_subtests"
-    else
-        # Fallback
-        echo "  movement"
-        echo "  collision"
-        echo "  input"
-        echo "  boundary"
-    fi
-
-    echo ""
-    print_color $BLUE "Usage: $0 [-c CART_FILE] SUBTEST"
-}
+# Note: `handle_list_subtests()` is provided by the shared library
+# `lib/test_functions.sh`. The test helper sources that library at the
+# top of this file, so we intentionally do not duplicate the implementation
+# here to avoid drift. If you need to override listing behavior in tests,
+# mock or wrap `handle_list_subtests()` in your test harness.
