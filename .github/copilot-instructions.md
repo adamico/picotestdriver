@@ -8,35 +8,13 @@ These instructions help AI assistants understand the framework's patterns and co
 ## Key Files
 - **`test_framework.lua`** - Core framework managing test phases, frame counting, logging, and initialization
 - **`test_utils.lua`** - Testing utilities including assertions, performance measurement, input simulation, and result collection
-- **`run_test.sh`** - Bash script for command-line test execution with timeout and parameter passing
+- **`ptd`** - Bash script for command-line test execution with timeout and parameter passing
 - **`test_cart.p8`** - Example cartridge demonstrating framework integration and test patterns
+- **`init.lua`** - Example game initialization logic
+- **`update.lua`** - Example game update logic
+- **`draw.lua`** - Example game drawing logic
 
 ## Architecture & Patterns
-
-### Frame-Based Execution Model
-All testing occurs within PICO-8's 60 FPS game loop. Tests are frame-aware and use cooperative scheduling:
-
-```lua
-function _update60()
-    test_update_frame()  -- Must be called first to advance frame counter
-
-    local phase = test_get_phase()
-    if phase == "movement" then
-        test_movement()
-    elseif phase == "all" then
-        update_game()  -- Normal game logic
-    end
-end
-```
-
-### Phase-Based Test Organization
-Tests are organized into named phases for isolated execution. Use command-line parameters to run specific phases:
-
-```bash
-./run_test.sh movement_test    # Run only movement tests
-./run_test.sh collision_test   # Run only collision tests
-./run_test.sh                  # Run all tests (default)
-```
 
 ### PICO-8 Constraint Adaptations
 - **No exceptions**: Use return values and `test_log()` for error indication
@@ -94,276 +72,43 @@ end
    ```
 
 4. **Run tests** via command line:
-   ```bash
-   ./run_test.sh                    # All tests, 30s timeout
-   ./run_test.sh movement_test      # Specific phase
-   ./run_test.sh collision_test 60  # Custom timeout
-   ```
 
-### Test Structure Pattern
-Follow this consistent structure for all test functions:
+## ptd CLI (accurate summary)
 
-```lua
-function test_feature_name()
-    test_log("Testing specific behavior", "info")
+- Overview: `ptd` is the repository CLI (see `ptd` at repo root). Key commands are `test`, `generate`, `help`, `version`.
 
-    -- Setup: Prepare test scenario
-    setup_test_data()
+    - `ptd test` details:
+    - Flags: `-c|--cart <file>` (cartridge), `-d|--demo` (use demo cart), `-l|--list` (list subtests; legacy), `--verbose`, `-h|--help`, `-v|--version`.
+    - Positionals: `SUBTEST` (name) and optional numeric `TIMEOUT` (seconds). Defaults: `test_cart.p8`, `30` seconds.
+    - Listing subtests: prefer the dedicated `ptd list -c <file>` command to enumerate subtests. The legacy `--list` flag on `ptd test` continues to work; both implementations extract `local subtests = { ... }` from the `.p8` and any included `.lua` files (ignore `test_framework.lua` and `test_utils.lua`) and print unique names.
+    - Requirements: `pico8` must be in `PATH`; the script uses the `timeout` command to limit runtime. It builds a command like `pico8 -run <cart>` and forwards `-p <subtest>:<timeout>` or `-p timeout:<timeout>`.
+    - Useful exit codes: `0` success, `1` invalid args, `2` pico8 missing, `3` cartridge not found, `124` timeout.
 
-    -- Execute: Run code being tested
-    perform_action_under_test()
+- `ptd generate` details:
+    - Options: `-d|--dir DIR`, `-n|--name NAME`, `-s|--subtests LIST` (comma-separated), `-t|--timeout SECONDS`, `--framework-path PATH`.
+    - Output: `{name}.p8` (includes `#include` to framework and the generated `.lua`) and `{name}.lua` with subtest boilerplate. Default `subtests` is `movement,collision,input,boundary` and default framework path is `../lib/picotestdriver/test_framework.lua`.
 
-    -- Assert: Verify expected results
-    test_assert(condition, "Clear failure description")
-    test_assert_equal(actual, expected, "Values should match")
+- Files to inspect when changing CLI behavior: `ptd` (root), `lib/test_functions.sh`, `run_test.sh` / `run_test_testable.sh`, and the `test/` unit tests that exercise `ptd` (`test/*.sh`). Use those tests to validate CLI changes.
 
-    -- Cleanup: Mark test complete
-    test_complete()
-end
-```
+- Editing rules for agents: when adjusting generation templates, keep generated `.p8` compact to avoid PICO‑8 token limits; when changing `--list` logic, update unit tests in `test/` accordingly.
+
+# Copilot Instructions — Pico Test Driver (concise)
+
+Purpose: give AI coding agents the minimal, actionable knowledge to be productive in this repo.
+
+- Big picture: this repo is a PICO-8 test framework. Key runtime is PICO-8's 60 FPS game loop; tests are frame-aware and organized into named phases.
+
+- Important constraints: PICO-8 has an 8192 token limit, no exceptions, limited stdlib, and global scope. Prefer small functions, concise names, and explicit restoration when overriding globals.
+
+- Conventions you must follow: test functions named `test_feature_name()`, setup functions `setup_*()`, call `test_complete()` when done, and use `test_assert*` helpers for checks.
+
+- Editing rules for AI agents: avoid long-form changes that increase token usage in cartridges; when overriding global functions, add a documented restore and brief comment. Do not assume availability of Lua stdlib helpers like `pcall` or `table.unpack`.
+
+- Terminal command rules for auto-approval in this workspace: check the current working directory first; avoid single-line `cd /path && cmd` patterns — use a single `cd /path` then run commands, or use a subshell `(cd /path && cmd)` for one-offs.
+
+- Versioning & commits: repo uses Conventional Commits; follow `feat/fix/docs/test/refactor/chore/ci` conventions. Use scripts in `scripts/` for changelog automation if present.
+
+If anything here is unclear or you want the file to be longer/shorter or translated, tell me which sections to expand or remove and I will iterate.
+
 
 ### Assertion Patterns
-Use descriptive assertion messages and the most appropriate assertion type:
-
-```lua
--- Value comparisons
-test_assert_equal(player.x, 64, "Player starts at center")
-test_assert_not_equal(score, 0, "Score changed after action")
-
--- Boolean conditions
-test_assert_true(collision_detected, "Collision detected when objects overlap")
-test_assert_false(player.dead, "Player survives normal damage")
-
--- Range validation
-test_assert_in_range(damage, 1, 10, "Damage is within expected bounds")
-
--- Approximate floating point
-test_assert_approx_equal(velocity, 2.5, 0.1, "Velocity within tolerance")
-```
-
-### Performance Testing
-Measure frame-based performance for game-critical code:
-
-```lua
-local result = test_measure_performance(function()
-    update_enemy_ai()
-    check_collisions()
-end, 100, "Game logic update")
-
-test_assert(result.avg_frames < 2, "Game logic runs within 2 frames")
-```
-
-### Input Simulation
-Test input-dependent behavior by simulating button states:
-
-```lua
--- Simulate button press for one frame
-test_press_button(0)    -- Left arrow
-update_player()
-test_assert(player.x < 64, "Player moves left")
-
--- Test button sequences
-test_press_button(2)    -- Up (jump)
-test_wait_frames(10)    -- Hold for jump duration
-test_release_button(2)  -- Release
-test_assert(player.jumping, "Jump initiated")
-```
-
-## Project-Specific Conventions
-
-### Naming Conventions
-- **Test functions**: `test_feature_name()` (e.g., `test_player_movement()`)
-- **Setup functions**: `setup_feature()` or `init_test_scenario()`
-- **Global variables**: Use descriptive names to avoid conflicts
-- **Log levels**: `"info"` for important events, `"debug"` for detailed tracing, `"error"` for failures
-
-### Conditional Compilation
-Exclude testing code from production builds:
-
-```lua
---#if TEST_BUILD
-#include test_framework.lua
-#include test_utils.lua
---#endif
-
-function _init()
-    init_game()
---#if TEST_BUILD
-    test_init({phases = {"combat"}})
---#endif
-end
-```
-
-### Debug Output Standards
-Use structured logging with consistent prefixes:
-
-```
-[INFO] Test framework initialized - Phase: movement_test
-[DEBUG] Assertion passed: 64 == 64
-[ERROR] ASSERTION FAILED: Expected 5, got 3 - Player took unexpected damage
-```
-
-### Token Management
-Be mindful of PICO-8's 8192 token limit:
-- Use concise variable names in test code
-- Avoid unnecessary functions or deep nesting
-- Consider selective inclusion of framework components
-
-## Integration Points
-
-### External Dependencies
-- **PICO-8 executable**: Must be in PATH for `run_test.sh`
-- **Bash shell**: For test runner script execution
-- **Command-line timeout**: Uses `timeout` command for test duration limits
-
-### Cross-Component Communication
-- **Parameter passing**: Via `stat(6)` from command line to PICO-8
-- **Logging output**: `printh()` for console output captured by runner
-- **Exit codes**: Test success/failure communicated via PICO-8 exit codes
-
-### Build Integration
-- **Modular inclusion**: Framework files included via `#include` directives
-- **Conditional builds**: Use `--if` flags for test vs production builds
-- **Command-line automation**: `run_test.sh` integrates with CI/CD pipelines
-
-## Version Management & Release Process
-
-### Semantic Versioning (SemVer)
-This project follows [Semantic Versioning 2.0.0](https://semver.org/) strictly from v1.2.0 onwards:
-
-**Version Format**: `MAJOR.MINOR.PATCH`
-
-- **MAJOR (X.0.0)**: Breaking changes
-  - Changes that break backwards compatibility
-  - Commit types: `feat!:`, `fix!:`, or commits with `BREAKING CHANGE:` footer
-  - Example: Removing public API, changing CLI arguments, incompatible config changes
-
-- **MINOR (1.X.0)**: New features (backwards compatible)
-  - New functionality that doesn't break existing code
-  - Commit type: `feat:`
-  - Example: New test assertion, additional CLI option, new framework feature
-
-- **PATCH (1.2.X)**: Bug fixes and minor changes
-  - Bug fixes, documentation, tests, refactoring, chores
-  - Commit types: `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `perf:`
-  - Example: Fix assertion logic, update README, optimize performance
-
-### Release Workflow for AI Agents
-
-When preparing a release:
-
-1. **Review commits since last tag**: Check commit types to determine version bump
-   ```bash
-   git log $(git describe --tags --abbrev=0)..HEAD --oneline
-   ```
-
-2. **Determine new version**:
-   - Any `feat!:`, `fix!:`, or `BREAKING CHANGE:`? → Bump MAJOR
-   - Any `feat:`? → Bump MINOR
-   - Only `fix:`, `docs:`, `test:`, etc.? → Bump PATCH
-
-3. **Generate and release changelog**:
-   ```bash
-   ./scripts/generate_changelog.sh --auto-accept           # Add unreleased changes
-   ./scripts/generate_changelog.sh --release X.Y.Z -y     # Create version section
-   git add CHANGELOG.md && git commit -m "chore: release version X.Y.Z"
-   git tag -a vX.Y.Z -m "Release vX.Y.Z: Brief description"
-   ```
-
-4. **Verify before pushing**:
-   ```bash
-   ./scripts/test_changelog_new_format.sh  # Run tests
-   git log --oneline --decorate -5         # Verify commit and tag
-   ```
-
-### Conventional Commits
-All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format:
-
-```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-**Common types**:
-- `feat`: New feature (→ MINOR bump)
-- `fix`: Bug fix (→ PATCH bump)
-- `docs`: Documentation only
-- `test`: Adding or updating tests
-- `refactor`: Code change that neither fixes a bug nor adds a feature
-- `perf`: Performance improvement
-- `chore`: Maintenance tasks, dependency updates
-- `ci`: CI/CD configuration changes
-
-**Breaking changes**: Add `!` after type or include `BREAKING CHANGE:` footer (→ MAJOR bump)
-
-### Historical Context
-Versions v1.0.0 through v1.1.3 predate strict semver enforcement and used PATCH bumps for features. Starting from v1.2.0, proper semantic versioning is enforced. Past versions are considered water under the bridge.
-
-## Terminal Command Patterns (CRITICAL)
-
-When working with GitHub Copilot in VS Code, follow these patterns for auto-approvable commands:
-
-### ✅ AUTO-APPROVABLE PATTERNS (BEST TO WORST)
-
-**Pattern 1: Check Cwd, then run simple commands (BEST)**
-```bash
-# The terminal maintains a persistent working directory (Cwd)
-# Check context: Cwd: /home/user/project
-
-# If already in the right directory, just run the command:
-git status
-ls -la
-git commit -m "message"
-
-# If not in the right directory, change once:
-cd /target/dir
-
-# Then run simple commands (all auto-approved):
-git status
-ls -la
-```
-
-**Pattern 2: Subshell for one-off operations (GOOD)**
-```bash
-# Single operation in different directory without changing terminal state
-(cd /target/dir && command1 && command2)
-
-# Example:
-(cd ~/game_dev/obsi/lib/picotestdriver && git status && wc -l CHANGELOG.md)
-(cd ~/game_dev/obsi/lib/picotestdriver && changelog --rebuild)
-```
-
-### ❌ CANNOT AUTO-APPROVE
-
-**Avoid these patterns:**
-```bash
-# This CANNOT be auto-approved by Copilot
-cd /path && command
-
-# This CANNOT be auto-approved
-cd /path && command1 && command2
-```
-
-### Why This Matters
-- Commands starting with `cd /path &&` cannot be auto-approved in VS Code
-- Simple commands ARE auto-approved when terminal is already in the right directory
-- Check the `Cwd` in context before running commands
-- Use `cd` once to change directory, then run multiple simple commands
-- Subshells `(cd ... && ...)` work for one-off operations but don't persist directory changes
-
-### Best Practice Workflow
-1. **Check context**: Look at `Cwd: /current/path` in the context
-2. **If in right directory**: Run simple commands directly (auto-approved)
-3. **If wrong directory**: Run `cd /target/path` once
-4. **Then**: All subsequent simple commands are auto-approved
-5. **For one-off**: Use subshell `(cd /path && command)` if you don't want to change terminal state
-
-### Enforcement
-**ALWAYS check Cwd first**. If terminal is already in the right directory, just run simple commands. Never use `cd /path && command` as a single command string.
-
----
-
-*Update this file if you add new major systems, workflows, or conventions.*

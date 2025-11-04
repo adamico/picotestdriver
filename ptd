@@ -37,6 +37,77 @@ print_color() {
     echo -e "${color}${message}${NC}"
 }
 
+# List subtests helper (top-level so it can be used by both `ptd test --list` and `ptd list`)
+handle_list_subtests() {
+    local cart_file=$1
+    print_color $BLUE "Available test subtests in '$cart_file':"
+    echo ""
+
+    local cart_dir
+    cart_dir=$(dirname "$cart_file")
+    local all_subtests=""
+    local found_subtests=false
+
+    extract_subtests() {
+        local file=$1
+        # Extract name = "..." and name = '...' occurrences between the subtests table
+        local names
+        names=$( (sed -n -E 's/.*name[[:space:]]*=[[:space:]]*"(.*)".*/\1/p' "$file" 2>/dev/null || true; \
+                  sed -n -E "s/.*name[[:space:]]*=[[:space:]]*'([^']+)'.*/\1/p" "$file" 2>/dev/null || true) | tr -d '\r')
+        echo "$names"
+    }
+
+    local cart_subtests
+    if [ -f "$cart_file" ]; then
+        cart_subtests=$(extract_subtests "$cart_file")
+        if [ -n "$cart_subtests" ]; then
+            all_subtests="$cart_subtests"
+            found_subtests=true
+        fi
+
+        local included_files
+        included_files=$(grep "^#include" "$cart_file" | sed 's/#include //' | grep '\.lua$' | grep -v 'test_framework\.lua' | grep -v 'test_utils\.lua' || true)
+
+        for lua_file in $included_files; do
+            local resolved_path
+            if [[ "$lua_file" == /* ]]; then
+                resolved_path="$lua_file"
+            else
+                resolved_path="$cart_dir/$lua_file"
+            fi
+
+            if [ -f "$resolved_path" ]; then
+                local file_subtests
+                file_subtests=$(extract_subtests "$resolved_path")
+                if [ -n "$file_subtests" ]; then
+                    if [ -n "$all_subtests" ]; then
+                        all_subtests="$all_subtests"$'\n'"$file_subtests"
+                    else
+                        all_subtests="$file_subtests"
+                    fi
+                    found_subtests=true
+                fi
+            fi
+        done
+    fi
+
+    if [ "$found_subtests" = true ]; then
+        local unique_subtests
+        unique_subtests=$(echo "$all_subtests" | sort | uniq)
+        while IFS= read -r subtest; do
+            if [ -n "$subtest" ]; then
+                print_color $GREEN "  $subtest"
+            fi
+        done <<< "$unique_subtests"
+    else
+        print_color $YELLOW "No subtests found. Make sure your test file includes:"
+        print_color $NC '  local subtests = { { name = "test_name", ... }, ... }'
+    fi
+
+    echo ""
+    print_color $BLUE "Usage: ptd test -c $cart_file SUBTEST"
+}
+
 # Show main help
 show_main_help() {
     print_color $BLUE "PicoTestDriver v${PTD_VERSION}"
@@ -47,6 +118,7 @@ show_main_help() {
     echo ""
     print_color $YELLOW "COMMANDS:"
     print_color $GREEN "    test        ${NC}Run PICO-8 test cartridges with automated testing"
+    print_color $GREEN "    list        ${NC}List available test subtests in a cartridge"
     print_color $GREEN "    generate    ${NC}Generate test files for your project"
     print_color $GREEN "    help        ${NC}Show help for a specific command"
     print_color $GREEN "    version     ${NC}Show version information"
@@ -63,6 +135,9 @@ show_main_help() {
     echo ""
     print_color $GREEN "    ptd help test"
     print_color $NC "        Show detailed help for the test command"
+    echo ""
+    print_color $GREEN "    ptd list -c tests/my_game.p8"
+    print_color $NC "        List available subtests in the cartridge"
     echo ""
     print_color $YELLOW "Get started:"
     print_color $GREEN "    ptd generate -d tests -n my_game    ${NC}# Create test files"
@@ -145,77 +220,7 @@ cmd_test() {
         fi
     }
 
-    # Handle list subtests
-    handle_list_subtests() {
-        local cart_file=$1
-        print_color $BLUE "Available test subtests in '$cart_file':"
-        echo ""
 
-        local cart_dir
-        cart_dir=$(dirname "$cart_file")
-        local all_subtests=""
-        local found_subtests=false
-
-        extract_subtests() {
-            local file=$1
-            local names
-            names=$(awk '/local subtests\s*=\s*\{/,/^\}/ {
-                if ($0 ~ /name\s*=\s*"[^"]+"|name\s*=\s*'\''[^'\'']+'\''/) {
-                    match($0, /(name\s*=\s*["'\''])([^"'\'']+)(["'\''])/, arr)
-                    if (arr[2] != "") print arr[2]
-                }
-            }' "$file")
-            echo "$names"
-        }
-
-        local cart_subtests
-        cart_subtests=$(extract_subtests "$cart_file")
-        if [ -n "$cart_subtests" ]; then
-            all_subtests="$cart_subtests"
-            found_subtests=true
-        fi
-
-        local included_files
-        included_files=$(grep "^#include" "$cart_file" | sed 's/#include //' | grep '\.lua$' | grep -v 'test_framework\.lua' | grep -v 'test_utils\.lua')
-
-        for lua_file in $included_files; do
-            local resolved_path
-            if [[ "$lua_file" == /* ]]; then
-                resolved_path="$lua_file"
-            else
-                resolved_path="$cart_dir/$lua_file"
-            fi
-
-            if [ -f "$resolved_path" ]; then
-                local file_subtests
-                file_subtests=$(extract_subtests "$resolved_path")
-                if [ -n "$file_subtests" ]; then
-                    if [ -n "$all_subtests" ]; then
-                        all_subtests="$all_subtests"$'\n'"$file_subtests"
-                    else
-                        all_subtests="$file_subtests"
-                    fi
-                    found_subtests=true
-                fi
-            fi
-        done
-
-        if [ "$found_subtests" = true ]; then
-            local unique_subtests
-            unique_subtests=$(echo "$all_subtests" | sort | uniq)
-            while IFS= read -r subtest; do
-                if [ -n "$subtest" ]; then
-                    print_color $GREEN "  $subtest"
-                fi
-            done <<< "$unique_subtests"
-        else
-            print_color $YELLOW "No subtests found. Make sure your test file includes:"
-            print_color $NC '  local subtests = { { name = "test_name", ... }, ... }'
-        fi
-
-        echo ""
-        print_color $BLUE "Usage: ptd test -c $cart_file SUBTEST"
-    }
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -284,15 +289,19 @@ cmd_test() {
         exit 1
     fi
 
-    # Check prerequisites
-    check_pico8
-    check_cartridge "$CART_FILE"
-
-    # Handle list subtests
+    # Handle list subtests early so it does not require a local PICO-8 binary
     if $LIST_SUBTESTS; then
+        # Ensure default cartridge is set (set earlier, but be defensive)
+        if [ -z "$CART_FILE" ]; then
+            CART_FILE="test_cart.p8"
+        fi
         handle_list_subtests "$CART_FILE"
         exit 0
     fi
+
+    # Check prerequisites (required only for running tests)
+    check_pico8
+    check_cartridge "$CART_FILE"
 
     # Show configuration
     print_color $BLUE "=== PicoTestDriver v${PTD_VERSION} ==="
@@ -676,9 +685,43 @@ EOF
     print_color $NC "  1. Edit $LUA_FILE to implement your tests"
     print_color $GREEN "  2. Run tests with: ptd test -c $P8_FILE"
     print_color $GREEN "  3. Run specific subtest: ptd test -c $P8_FILE <subtest_name>"
-    print_color $GREEN "  4. List subtests: ptd test -c $P8_FILE --list"
+    print_color $GREEN "  4. List subtests: ptd list -c $P8_FILE"
     echo ""
     print_color $GREEN "Happy testing!"
+}
+
+# LIST SUBCOMMAND
+cmd_list() {
+    local CART_FILE=""
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                print_color $BLUE "Usage: ptd list -c <cartridge>"
+                exit 0
+                ;;
+            -c|--cart)
+                CART_FILE="$2"
+                shift 2
+                ;;
+            -d|--demo)
+                CART_FILE="$SCRIPT_DIR/test_cart.p8"
+                shift
+                ;;
+            *)
+                print_color $RED "Unknown option: $1"
+                echo "Use 'ptd help' for usage information"
+                exit 1
+                ;;
+        esac
+    done
+
+    if [ -z "$CART_FILE" ]; then
+        CART_FILE="test_cart.p8"
+    fi
+
+    handle_list_subtests "$CART_FILE"
+    exit 0
 }
 
 # MAIN COMMAND ROUTER
@@ -694,6 +737,9 @@ main() {
     case $command in
         test)
             cmd_test "$@"
+            ;;
+        list)
+            cmd_list "$@"
             ;;
         generate|gen)
             cmd_generate "$@"

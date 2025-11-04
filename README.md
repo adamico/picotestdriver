@@ -48,10 +48,10 @@ cd picotestdriver
 # Run the demo test cartridge
 ./ptd test -d
 
-# List available test subtests
-./ptd test -d --list
-# Available subtests:
-#   - movement:    Player movement tests
+# List available test subtests:
+```bash
+./ptd list -c my_test.p8
+```
 #   - collision:   Collision detection tests
 #   - input:       Input handling tests
 #   - boundary:    Boundary clamping tests
@@ -97,7 +97,7 @@ This creates:
 ./ptd test -c tests/my_game.p8 collision 60
 
 # List all available subtests
-./ptd test -c tests/my_game.p8 --list
+./ptd list -c tests/my_game.p8
 ```
 
 ### 5. Manual Integration (Alternative)
@@ -274,10 +274,10 @@ The `ptd` command provides two main subcommands:
 ./ptd test -c my_test.p8 movement
 
 # Custom timeout (in seconds)
-./ptd test -c my_test.p8 combat 120
+./ptd list -c tests/my_game.p8
 
 # List available test subtests
-./ptd test -c my_test.p8 --list
+./ptd list -c my_test.p8
 
 # Help and options
 ./ptd test --help
