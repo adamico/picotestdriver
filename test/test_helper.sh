@@ -56,7 +56,7 @@ EXAMPLES:
     ./ptd test -c my_test.p8
         Run all tests in my_test.p8 cartridge
 
-    ./ptd test -c my_test.p8 --list
+    ./ptd list -c my_test.p8
         List all available test subtests
 
 REQUIREMENTS:
