@@ -114,267 +114,17 @@ show_main_help() {
     print_color $NC "PICO-8 Automated Testing Framework"
     echo ""
     print_color $YELLOW "USAGE:"
-    print_color $NC "    ptd <command> [options]"
+    print_color $NC "  ptd <command> [options]"
     echo ""
     print_color $YELLOW "COMMANDS:"
-    print_color $GREEN "    test        ${NC}Run PICO-8 test cartridges with automated testing"
-    print_color $GREEN "    list        ${NC}List available test subtests in a cartridge"
-    print_color $GREEN "    generate    ${NC}Generate test files for your project"
-    print_color $GREEN "    help        ${NC}Show help for a specific command"
-    print_color $GREEN "    version     ${NC}Show version information"
+    print_color $GREEN "  test      ${NC}Run PICO-8 test cartridges"
+    print_color $GREEN "  list      ${NC}List subtests in a cartridge (no PICO-8 required)"
+    print_color $GREEN "  generate  ${NC}Generate test files from templates"
+    print_color $GREEN "  help      ${NC}Show help for a command"
+    print_color $GREEN "  version   ${NC}Show version information"
     echo ""
-    print_color $YELLOW "EXAMPLES:"
-    print_color $GREEN "    ptd test -d"
-    print_color $NC "        Run the demo test cartridge"
-    echo ""
-    print_color $GREEN "    ptd test -c my_test.p8"
-    print_color $NC "        Run tests from your cartridge"
-    echo ""
-    print_color $GREEN "    ptd generate -d tests -n my_game"
-    print_color $NC "        Generate test files in tests/ directory"
-    echo ""
-    print_color $GREEN "    ptd help test"
-    print_color $NC "        Show detailed help for the test command"
-    echo ""
-    print_color $GREEN "    ptd list -c tests/my_game.p8"
-    print_color $NC "        List available subtests in the cartridge"
-    echo ""
-    print_color $YELLOW "Get started:"
-    print_color $GREEN "    ptd generate -d tests -n my_game    ${NC}# Create test files"
-    print_color $GREEN "    ptd test -c tests/my_game.p8        ${NC}# Run your tests"
-    echo ""
-    print_color $BLUE "For more information: https://github.com/adamico/picotestdriver"
-}
-
-# TEST SUBCOMMAND
-cmd_test() {
-    local DEFAULT_TIMEOUT=30
-    local SUBTEST="all"
-    local TIMEOUT=$DEFAULT_TIMEOUT
-    local VERBOSE=false
-    local LIST_SUBTESTS=false
-    local CART_FILE=""
-    local DEMO_MODE=false
-    local ARGS_PROVIDED=$#
-
-    # Show test help
-    show_test_help() {
-        print_color $BLUE "PicoTestDriver v${PTD_VERSION} - Test Runner"
-        echo ""
-        print_color $NC "Run PICO-8 cartridges with automated testing capabilities."
-        echo ""
-        print_color $YELLOW "USAGE:"
-        print_color $NC "    ptd test [OPTIONS] [SUBTEST] [TIMEOUT]"
-        echo ""
-        print_color $YELLOW "ARGUMENTS:"
-        print_color $NC "    SUBTEST     Test subtest to run (default: all)"
-        print_color $NC "    TIMEOUT     Maximum runtime in seconds (default: ${DEFAULT_TIMEOUT})"
-        echo ""
-        print_color $YELLOW "OPTIONS:"
-        print_color $GREEN "    -h, --help      ${NC}Show this help message"
-        print_color $GREEN "    -c, --cart      ${NC}Specify the test cartridge file"
-        print_color $GREEN "    -d, --demo      ${NC}Run the demo test cartridge"
-        print_color $GREEN "    -l, --list      ${NC}List available test subtests"
-        print_color $GREEN "    -v, --version   ${NC}Show version information"
-        print_color $GREEN "    --verbose       ${NC}Enable verbose output"
-        echo ""
-        print_color $YELLOW "EXAMPLES:"
-        print_color $GREEN "    ptd test -d"
-        print_color $NC "        Run the demo test cartridge"
-        echo ""
-        print_color $GREEN "    ptd test -c my_test.p8"
-        print_color $NC "        Run all tests in my_test.p8"
-        echo ""
-        print_color $GREEN "    ptd test -c my_test.p8 movement"
-        print_color $NC "        Run only the movement subtest"
-        echo ""
-        print_color $GREEN "    ptd test -c my_test.p8 collision 60"
-        print_color $NC "        Run collision tests with 60 second timeout"
-        echo ""
-    print_color $GREEN "    ptd list -c my_test.p8"
-    print_color $NC "        List all available test subtests (preferred)"
-        echo ""
-        print_color $YELLOW "EXIT CODES:"
-        print_color $NC "    0   Success"
-        print_color $NC "    1   Invalid arguments"
-        print_color $NC "    2   PICO-8 not found"
-        print_color $NC "    3   Test cartridge not found"
-        print_color $NC "    124 Timeout reached"
-    }
-
-    # Check if PICO-8 is available
-    check_pico8() {
-        if ! command -v pico8 &> /dev/null; then
-            print_color $RED "Error: PICO-8 executable not found in PATH"
-            echo "Please ensure PICO-8 is installed and accessible."
-            exit 2
-        fi
-    }
-
-    # Check if cartridge exists
-    check_cartridge() {
-        local cart_file=$1
-        if [ ! -f "$cart_file" ]; then
-            print_color $RED "Error: Test cartridge '$cart_file' not found"
-            exit 3
-        fi
-    }
-
-
-
-    # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -h|--help)
-                show_test_help
-                exit 0
-                ;;
-            -v|--version)
-                echo "PicoTestDriver v${PTD_VERSION}"
-                exit 0
-                ;;
-            -c|--cart)
-                CART_FILE="$2"
-                shift 2
-                ;;
-            -d|--demo)
-                DEMO_MODE=true
-                CART_FILE="$SCRIPT_DIR/test_cart.p8"
-                shift
-                ;;
-            -l|--list)
-                LIST_SUBTESTS=true
-                shift
-                ;;
-            --verbose)
-                VERBOSE=true
-                shift
-                ;;
-            *)
-                if [[ $1 =~ ^[0-9]+$ ]]; then
-                    TIMEOUT=$1
-                else
-                    SUBTEST=$1
-                fi
-                shift
-                ;;
-        esac
-    done
-
-    # Show usage if no arguments
-    if [ $ARGS_PROVIDED -eq 0 ]; then
-        print_color $YELLOW "No arguments provided."
-        echo ""
-        echo "Usage: ptd test [OPTIONS] [SUBTEST] [TIMEOUT]"
-        echo ""
-        echo "Quick start:"
-        echo "  ptd test -d                    Run the demo"
-        echo "  ptd test -c my_test.p8         Run your tests"
-        echo "  ptd help test                  Show full help"
-        echo ""
-        echo "New to testing? Generate test files:"
-        echo "  ptd generate -d tests -n my_game"
-        echo ""
-        exit 1
-    fi
-
-    # Set default cartridge
-    if [ -z "$CART_FILE" ]; then
-        CART_FILE="test_cart.p8"
-    fi
-
-    # Validate timeout
-    if ! [[ $TIMEOUT =~ ^[0-9]+$ ]] || [ $TIMEOUT -le 0 ]; then
-        print_color $RED "Error: Invalid timeout '$TIMEOUT'. Must be a positive integer."
-        exit 1
-    fi
-
-    # Handle list subtests early so it does not require a local PICO-8 binary
-    if $LIST_SUBTESTS; then
-        # Ensure default cartridge is set (set earlier, but be defensive)
-        if [ -z "$CART_FILE" ]; then
-            CART_FILE="test_cart.p8"
-        fi
-        handle_list_subtests "$CART_FILE"
-        exit 0
-    fi
-
-    # Check prerequisites (required only for running tests)
-    check_pico8
-    check_cartridge "$CART_FILE"
-
-    # Show configuration
-    print_color $BLUE "=== PicoTestDriver v${PTD_VERSION} ==="
-    print_color $NC "Cartridge: $CART_FILE"
-    print_color $NC "Subtest: $SUBTEST"
-    print_color $NC "Timeout: ${TIMEOUT}s"
-    if $VERBOSE; then
-        print_color $NC "Verbose: enabled"
-    fi
-    echo ""
-
-    # Build command
-    local CMD="pico8 -run $CART_FILE"
-    if [ "$SUBTEST" != "all" ]; then
-        CMD="$CMD -p ${SUBTEST}:${TIMEOUT}"
-    else
-        CMD="$CMD -p timeout:${TIMEOUT}"
-    fi
-
-    if $VERBOSE; then
-        print_color $YELLOW "Command: $CMD"
-        echo ""
-    fi
-
-    # Run the test
-    print_color $GREEN "Starting test execution..."
-    print_color $YELLOW "Press Ctrl+C to abort"
-    echo ""
-
-    timeout "$TIMEOUT" $CMD
-
-    # Check exit code
-    EXIT_CODE=$?
-    echo ""
-
-    if [ $EXIT_CODE -eq 124 ]; then
-        print_color $YELLOW "Test execution timed out after ${TIMEOUT} seconds"
-    elif [ $EXIT_CODE -eq 0 ]; then
-        print_color $GREEN "Test execution completed successfully"
-    else
-        print_color $RED "Test execution failed with exit code $EXIT_CODE"
-    fi
-
-    # Rename PICO-8 log files to remove .p8l extension
-    # PICO-8 saves files to ~/.lexaloffle/pico-8/carts/
-    local PICO8_CARTS_DIR="$HOME/.lexaloffle/pico-8/carts"
-    if [ -d "$PICO8_CARTS_DIR" ]; then
-        print_color $BLUE "Cleaning up log file extensions..."
-        
-        # Rename .json.p8l to .json
-        for file in "$PICO8_CARTS_DIR"/*.json.p8l; do
-            if [ -f "$file" ]; then
-                local new_name="${file%.p8l}"
-                mv "$file" "$new_name"
-                print_color $GREEN "  Renamed: $(basename "$file") → $(basename "$new_name")"
-            fi
-        done
-        
-        # Rename .md.p8l to .md
-        for file in "$PICO8_CARTS_DIR"/*.md.p8l; do
-            if [ -f "$file" ]; then
-                local new_name="${file%.p8l}"
-                mv "$file" "$new_name"
-                print_color $GREEN "  Renamed: $(basename "$file") → $(basename "$new_name")"
-            fi
-        done
-        
-        # .log.p8l files stay as they are (standard PICO-8 log format)
-    fi
-    
-    echo ""
-
-    exit $EXIT_CODE
+    print_color $YELLOW "EXAMPLE:"
+    print_color $NC "  ptd list -c test_cart.p8"
 }
 
 # GENERATE SUBCOMMAND
@@ -496,9 +246,18 @@ cmd_generate() {
         fi
     fi
 
-    # Generate .p8 file
+    # Generate .p8 file (use template when available)
     print_color $GREEN "Generating $P8_FILE..."
-    cat > "$P8_FILE" << EOF
+    P8_TEMPLATE="$SCRIPT_DIR/templates/default.p8"
+    if [ -f "$P8_TEMPLATE" ]; then
+        export TEST_NAME="$TEST_NAME"
+        export FRAMEWORK_PATH="$FRAMEWORK_PATH"
+        perl -0777 -pe '
+            s/{{TEST_NAME}}/$ENV{TEST_NAME}/g;
+            s/{{FRAMEWORK_PATH}}/$ENV{FRAMEWORK_PATH}/g;
+        ' "$P8_TEMPLATE" > "$P8_FILE"
+    else
+        cat > "$P8_FILE" << EOF
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
@@ -511,6 +270,7 @@ __lua__
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 EOF
+    fi
 
     print_color $GREEN "✓ Created $P8_FILE"
 
